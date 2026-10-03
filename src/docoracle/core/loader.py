@@ -118,10 +118,10 @@ class AntoraLoader:
         if url.endswith(".git"):
             url = url[:-4]
 
-        # Handle HTTPS URLs
-        if "https://" in url or "http://" in url:
-            # Remove protocol
-            clean_url = url.replace("https://", "").replace("http://", "")
+        # Handle URLs with a scheme (e.g. https://, http://)
+        if "://" in url:
+            # Remove scheme
+            clean_url = url.split("://", 1)[1]
             # Get path parts
             parts = clean_url.split("/")
             # Filter empty parts from trailing slashes
