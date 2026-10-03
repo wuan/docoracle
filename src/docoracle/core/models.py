@@ -108,12 +108,12 @@ class Chunk(BaseModel):
 
 
 class Document(BaseModel):
-    """An AsciiDoc document from Antora.
+    """A document from Antora, normalized to Markdown.
 
     Replaces the previous dataclass implementation with Pydantic BaseModel.
     """
 
-    content: str = Field(..., description="Raw AsciiDoc content")
+    content: str = Field(..., description="Markdown content (converted from AsciiDoc if needed)")
     file_path: str = Field(..., description="Path to the source file")
     module: str = Field(..., description="Antora module name")
     component: str = Field(..., description="Component name (from antora.yml name)")
