@@ -78,7 +78,7 @@ boundary.
 
 ## The browser session workflow
 
-The web UI (`src/server/static/ui.html`, served at `/ui`) is a single page. A
+The web UI (`src/docoracle/server/static/ui.html`, served at `/ui`) is a single page. A
 typical session proceeds like this:
 
 1. **Load.** The page opens and calls `GET /info`. The response reports the

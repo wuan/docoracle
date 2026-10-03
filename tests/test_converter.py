@@ -1,6 +1,6 @@
 """Tests for the AsciiDoc to Markdown converter."""
 
-from src.core.converter import convert_asciidoc_to_markdown
+from docoracle.core.converter import convert_asciidoc_to_markdown
 
 
 class TestAsciiDocToMarkdown:

@@ -1,12 +1,12 @@
 """Q&A agent built on pydantic-ai's Agent and Tool abstractions.
 
-Unlike :class:`src.backends.engine.QAEngine`, which always runs a fixed
+Unlike :class:`docoracle.backends.engine.QAEngine`, which always runs a fixed
 retrieve-then-answer pipeline, this agent lets the model decide whether
 to call the retrieval tool before producing a structured
 :class:`AnswerResponse`.
 
 The model is built with the same OpenAI-compatible provider as
-:class:`src.api.structured_llm_client.StructuredLLMClient`, so no
+:class:`docoracle.api.structured_llm_client.StructuredLLMClient`, so no
 vendor-specific optional dependency is required.
 
 Retrieved chunks are collected per run through pydantic-ai's dependency

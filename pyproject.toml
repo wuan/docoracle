@@ -30,8 +30,8 @@ dependencies = [
 ]
 
 [project.scripts]
-docoracle = "src.cli:cli"
-docoracle-server = "src.server.__main__:main"
+docoracle = "docoracle.cli:cli"
+docoracle-server = "docoracle.server.__main__:main"
 
 [project.optional-dependencies]
 dev = [
@@ -43,8 +43,8 @@ dev = [
 ]
 
 [tool.setuptools.packages.find]
-where = ["."]
-include = ["src*"]
+where = ["src"]
+include = ["docoracle*"]
 
 [tool.ruff]
 line-length = 100

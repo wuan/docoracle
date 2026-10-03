@@ -2,7 +2,7 @@
 
 Two answer paths exist today and have already drifted once:
 
-- `src/core/qa_engine.py::QAEngine` owns retrieval defaults and hyperparameters
+- `src/docoracle/core/qa_engine.py::QAEngine` owns retrieval defaults and hyperparameters
   (`retrieval.mode`, `top_k`, `rrf_k`, `prefetch_k`), applies filters inline,
   returns a detailed dict from `ask`/`ask_async`, and exposes
   `get_related_chunks` for search. Its "structured" answer goes through
@@ -10,13 +10,13 @@ Two answer paths exist today and have already drifted once:
   prompt and then runs `parse_structured` — regex extraction, JSON coercion, and
   best-effort fallbacks that can silently stuff the whole response into
   `answer`.
-- `src/agents/qa_agent.py::QAAgent` is a pydantic-ai `Agent` that validates
+- `src/docoracle/agents/qa_agent.py::QAAgent` is a pydantic-ai `Agent` that validates
   `AnswerResponse` natively via `output_type`, collects retrieved chunks per run
   through `RetrievalState`, and has `ask_detailed`/`ask_detailed_async`, but no
   entry point constructs it and its retrieval inputs (`mode`, `k`, filters) are
   prompt hints the model may ignore.
 
-The CLI (`src/cli.py`) and server (`src/server/main.py`) import `QAEngine`
+The CLI (`src/docoracle/cli.py`) and server (`src/docoracle/server/main.py`) import `QAEngine`
 directly and mutate `default_mode` to apply `--retrieval`. `pydantic-ai` is
 already a hard dependency and both paths build their model through
 `build_chat_model` (the OpenAI-compatible provider).
@@ -25,7 +25,7 @@ already a hard dependency and both paths build their model through
 
 **Goals:**
 
-- A single home for answer generation (`src/backends/`) with a shared
+- A single home for answer generation (`src/docoracle/backends/`) with a shared
   `AnswerBackend` protocol so CLI and server are backend-agnostic.
 - A config-driven backend choice (`docoracle.backend`, default `engine`) with no
   behavior change when unset.
@@ -45,10 +45,10 @@ already a hard dependency and both paths build their model through
 
 ## Decisions
 
-### A dedicated `src/backends/` package
+### A dedicated `src/docoracle/backends/` package
 
 Move both answer implementations out of `core`/`agents` into
-`src/backends/{protocol,engine,agent,factory}.py`. `core` becomes purely
+`src/docoracle/backends/{protocol,engine,agent,factory}.py`. `core` becomes purely
 retrieval/data concerns (models, config, loader, chunker, indices, searcher);
 `backends` owns generation.
 
@@ -134,7 +134,7 @@ backends.
 
 ## Migration Plan
 
-1. Create `src/backends/` and move `QAEngine`/`QAAgent` there; update imports.
+1. Create `src/docoracle/backends/` and move `QAEngine`/`QAAgent` there; update imports.
 2. Add `docoracle.backend` (default `engine`); route CLI/server through the factory.
 3. Switch the engine to native structured output and delete the parser.
 4. Enable `agent` in config where desired; roll back by setting `engine`.

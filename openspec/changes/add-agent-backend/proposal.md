@@ -9,18 +9,18 @@ natively but is unreachable from any entry point and does not obey the engine's
 retrieval contract. There is no abstraction that lets a caller choose between
 them, and no clean boundary between the two.
 
-This change gives each answer path its own home under a new `src/backends/`
+This change gives each answer path its own home under a new `src/docoracle/backends/`
 package, exposes a single configurable backend selection to all entry points,
 and replaces the engine's string-parsing approach with provider-native
 structured output.
 
 ## What Changes
 
-- **Introduce `src/backends/`** as the single home for answer generation:
+- **Introduce `src/docoracle/backends/`** as the single home for answer generation:
   - a shared `AnswerBackend` protocol (`ask`, `ask_async`,
     `get_related_chunks`, `default_mode`),
-  - `engine.py` hosting `QAEngine` (moved from `src/core/qa_engine.py`),
-  - `agent.py` hosting `QAAgent` and its tools (moved from `src/agents/`),
+  - `engine.py` hosting `QAEngine` (moved from `src/docoracle/core/qa_engine.py`),
+  - `agent.py` hosting `QAAgent` and its tools (moved from `src/docoracle/agents/`),
   - `factory.py` returning the configured backend.
 - **Select the backend from configuration**: add a `docoracle.backend` setting
   (`engine` | `agent`, default `engine`) with validation that names the valid
@@ -59,15 +59,15 @@ structured output.
 
 ## Impact
 
-- **New**: `src/backends/` (`__init__.py`, `protocol.py`, `engine.py`,
+- **New**: `src/docoracle/backends/` (`__init__.py`, `protocol.py`, `engine.py`,
   `agent.py`, `factory.py`).
-- **Removed**: `src/core/qa_engine.py`, `src/agents/` (moved into `backends`).
-- `src/core/llm_outputs.py`: remove the heuristic parser and prompt builder;
+- **Removed**: `src/docoracle/core/qa_engine.py`, `src/docoracle/agents/` (moved into `backends`).
+- `src/docoracle/core/llm_outputs.py`: remove the heuristic parser and prompt builder;
   keep the response models.
 - `src/api/structured_llm_client.py`: keep embeddings/chat/streaming; route
   structured answers through the native pydantic-ai path used by both backends.
-- `src/core/config.py`: add the `docoracle.backend` setting.
-- `src/cli.py`, `src/server/main.py`: depend only on the `AnswerBackend`
+- `src/docoracle/core/config.py`: add the `docoracle.backend` setting.
+- `src/docoracle/cli.py`, `src/docoracle/server/main.py`: depend only on the `AnswerBackend`
   protocol via the factory.
 - Tests: relocate engine/agent tests, delete parser-heuristic tests, add
   backend-selection, native-output, and engine/agent parity tests.

@@ -1,6 +1,6 @@
 """Tests for data models."""
 
-from src.core.models import Chunk, Document
+from docoracle.core.models import Chunk, Document
 
 
 def test_chunk_creation():

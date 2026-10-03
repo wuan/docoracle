@@ -2,9 +2,9 @@
 
 import uuid
 
-from src.backends.engine import QAEngine
-from src.core.hybrid_searcher import HybridSearcher
-from src.core.models import Chunk
+from docoracle.backends.engine import QAEngine
+from docoracle.core.hybrid_searcher import HybridSearcher
+from docoracle.core.models import Chunk
 
 
 class _FakeLLMClient:
@@ -28,7 +28,7 @@ class _FakeLLMClient:
         max_tokens=None,
         system=None,
     ):
-        from src.core.llm_outputs import AnswerResponse
+        from docoracle.core.llm_outputs import AnswerResponse
 
         self.last_question = question
         self.last_context = context
@@ -55,8 +55,8 @@ def test_prompt_does_not_include_provenance_or_score():
             page_id="p",
         ),
     ]
-    from src.core.bm25_index import BM25Index
-    from src.core.semantic_index import SemanticIndex
+    from docoracle.core.bm25_index import BM25Index
+    from docoracle.core.semantic_index import SemanticIndex
 
     hs = HybridSearcher(semantic=SemanticIndex(), bm25=BM25Index())
     # BM25 only is enough to exercise the prompt-building path without
@@ -101,8 +101,8 @@ def test_provenance_present_in_chunk_details():
             page_id="p",
         ),
     ]
-    from src.core.bm25_index import BM25Index
-    from src.core.semantic_index import SemanticIndex
+    from docoracle.core.bm25_index import BM25Index
+    from docoracle.core.semantic_index import SemanticIndex
 
     hs = HybridSearcher(semantic=SemanticIndex(), bm25=BM25Index())
     hs.add_chunks(chunks)

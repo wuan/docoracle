@@ -6,8 +6,8 @@ from pathlib import Path
 
 import numpy as np
 
-from src.core.hybrid_searcher import HybridSearcher
-from src.core.models import Chunk
+from docoracle.core.hybrid_searcher import HybridSearcher
+from docoracle.core.models import Chunk
 
 
 def _make_corpus(n: int = 5):
@@ -113,7 +113,7 @@ def test_load_returns_false_on_incompatible_chunks_pickle(capsys):
     """
     import pickle
 
-    from src.core.models import Chunk
+    from docoracle.core.models import Chunk
 
     with tempfile.TemporaryDirectory() as tmp:
         # Build a Chunk via the current schema, then strip chunk_id from

@@ -14,7 +14,7 @@ The system MUST perform hybrid retrieval (semantic + BM25 fused via RRF) as the 
 
 ### Requirement: SearchIndex Protocol
 
-The system MUST define a `SearchIndex` Protocol in `src/core/search_index.py` with `add`, `search`, `save`, and `load` methods. Both `SemanticIndex` and `BM25Index` MUST satisfy this Protocol.
+The system MUST define a `SearchIndex` Protocol in `src/docoracle/core/search_index.py` with `add`, `search`, `save`, and `load` methods. Both `SemanticIndex` and `BM25Index` MUST satisfy this Protocol.
 
 #### Scenario: Both indices satisfy the Protocol
 - **WHEN** type checking is run on `SemanticIndex` and `BM25Index`

@@ -2,8 +2,8 @@
 
 import pytest
 
-from src.core.chunker import Chunker
-from src.core.models import Chunk, Document
+from docoracle.core.chunker import Chunker
+from docoracle.core.models import Chunk, Document
 
 
 @pytest.fixture
@@ -752,7 +752,7 @@ def test_asciidoc_table_converted_to_flat_text():
 
 def test_asciidoc_table_preserves_word_endings():
     """The cell-modifier regex must not eat the trailing letter of a word."""
-    from src.core.converter import convert_asciidoc_to_markdown
+    from docoracle.core.converter import convert_asciidoc_to_markdown
 
     content = """[cols=",,",]
 |===
@@ -768,7 +768,7 @@ def test_asciidoc_table_preserves_word_endings():
 
 def test_asciidoc_table_with_line_continuation():
     """Cells joined via `+` continuation should be merged into one cell."""
-    from src.core.converter import convert_asciidoc_to_markdown
+    from docoracle.core.converter import convert_asciidoc_to_markdown
 
     content = """[cols=",,",]
 |===
@@ -856,7 +856,7 @@ def test_chunks_split_on_paragraph_boundaries():
 
 def test_xref_converted_to_markdown_link():
     """xref: macros should turn into markdown links with the page label."""
-    from src.core.converter import convert_asciidoc_to_markdown
+    from docoracle.core.converter import convert_asciidoc_to_markdown
 
     cases = {
         "xref:Geldanlage.adoc[]": "[Geldanlage](Geldanlage)",
@@ -870,7 +870,7 @@ def test_xref_converted_to_markdown_link():
 
 def test_star_lists_convert_to_nested_markdown():
     """Star bullets convert to indented Markdown list items."""
-    from src.core.converter import convert_asciidoc_to_markdown
+    from docoracle.core.converter import convert_asciidoc_to_markdown
 
     content = """* Top item
 ** Nested item
@@ -883,7 +883,7 @@ def test_star_lists_convert_to_nested_markdown():
 
 def test_inline_role_syntax_stripped():
     """``[.role]#text#`` should reduce to just ``text``."""
-    from src.core.converter import convert_asciidoc_to_markdown
+    from docoracle.core.converter import convert_asciidoc_to_markdown
 
     content = "notarielle [.underline]#Beglaubigung# der Unterschrift"
     result = convert_asciidoc_to_markdown(content)
@@ -894,7 +894,7 @@ def test_inline_role_syntax_stripped():
 
 def test_dot_lists_convert_to_numbered_markdown():
     """Dot-numbered lists convert to Markdown ordered lists, block titles untouched."""
-    from src.core.converter import convert_asciidoc_to_markdown
+    from docoracle.core.converter import convert_asciidoc_to_markdown
 
     content = """. First step
 . Second step

@@ -16,7 +16,7 @@ class TestComparisonResponse:
 
     def test_valid_comparison_response(self):
         """Test that a valid ComparisonResponse can be created."""
-        from src.core.llm_outputs import ComparisonResponse
+        from docoracle.core.llm_outputs import ComparisonResponse
 
         response = ComparisonResponse(
             items=["Option A", "Option B"],
@@ -35,7 +35,7 @@ class TestComparisonResponse:
 
     def test_comparison_response_without_recommendation(self):
         """Test ComparisonResponse without optional recommendation."""
-        from src.core.llm_outputs import ComparisonResponse
+        from docoracle.core.llm_outputs import ComparisonResponse
 
         response = ComparisonResponse(
             items=["A", "B"],
@@ -47,14 +47,14 @@ class TestComparisonResponse:
 
     def test_comparison_response_missing_required_fields(self):
         """Test that missing required fields raise ValidationError."""
-        from src.core.llm_outputs import ComparisonResponse
+        from docoracle.core.llm_outputs import ComparisonResponse
 
         with pytest.raises(ValidationError):
             ComparisonResponse()
 
     def test_comparison_response_missing_items(self):
         """Test that missing items field raises ValidationError."""
-        from src.core.llm_outputs import ComparisonResponse
+        from docoracle.core.llm_outputs import ComparisonResponse
 
         with pytest.raises(ValidationError) as exc_info:
             ComparisonResponse(
@@ -66,7 +66,7 @@ class TestComparisonResponse:
 
     def test_comparison_response_missing_comparison(self):
         """Test that missing comparison field raises ValidationError."""
-        from src.core.llm_outputs import ComparisonResponse
+        from docoracle.core.llm_outputs import ComparisonResponse
 
         with pytest.raises(ValidationError) as exc_info:
             ComparisonResponse(
@@ -78,7 +78,7 @@ class TestComparisonResponse:
 
     def test_comparison_response_missing_summary(self):
         """Test that missing summary field raises ValidationError."""
-        from src.core.llm_outputs import ComparisonResponse
+        from docoracle.core.llm_outputs import ComparisonResponse
 
         with pytest.raises(ValidationError) as exc_info:
             ComparisonResponse(
@@ -90,7 +90,7 @@ class TestComparisonResponse:
 
     def test_comparison_response_to_dict(self):
         """Test that ComparisonResponse can be serialized to dict."""
-        from src.core.llm_outputs import ComparisonResponse
+        from docoracle.core.llm_outputs import ComparisonResponse
 
         response = ComparisonResponse(
             items=["A", "B"],
@@ -108,7 +108,7 @@ class TestComparisonResponse:
 
     def test_comparison_response_from_dict(self):
         """Test that ComparisonResponse can be created from dict."""
-        from src.core.llm_outputs import ComparisonResponse
+        from docoracle.core.llm_outputs import ComparisonResponse
 
         data = {
             "items": ["A", "B"],
@@ -132,7 +132,7 @@ class TestListResponse:
 
     def test_valid_list_response(self):
         """Test that a valid ListResponse can be created."""
-        from src.core.llm_outputs import ListResponse
+        from docoracle.core.llm_outputs import ListResponse
 
         response = ListResponse(
             items=[
@@ -150,7 +150,7 @@ class TestListResponse:
 
     def test_list_response_without_categories(self):
         """Test ListResponse without optional categories."""
-        from src.core.llm_outputs import ListResponse
+        from docoracle.core.llm_outputs import ListResponse
 
         response = ListResponse(
             items=[{"name": "Test"}],
@@ -161,14 +161,14 @@ class TestListResponse:
 
     def test_list_response_missing_required_fields(self):
         """Test that missing required fields raise ValidationError."""
-        from src.core.llm_outputs import ListResponse
+        from docoracle.core.llm_outputs import ListResponse
 
         with pytest.raises(ValidationError):
             ListResponse()
 
     def test_list_response_missing_items(self):
         """Test that missing items field raises ValidationError."""
-        from src.core.llm_outputs import ListResponse
+        from docoracle.core.llm_outputs import ListResponse
 
         with pytest.raises(ValidationError) as exc_info:
             ListResponse(total_count=0)
@@ -177,7 +177,7 @@ class TestListResponse:
 
     def test_list_response_missing_total_count(self):
         """Test that missing total_count field raises ValidationError."""
-        from src.core.llm_outputs import ListResponse
+        from docoracle.core.llm_outputs import ListResponse
 
         with pytest.raises(ValidationError) as exc_info:
             ListResponse(items=[])
@@ -186,7 +186,7 @@ class TestListResponse:
 
     def test_list_response_empty_items(self):
         """Test ListResponse with empty items list."""
-        from src.core.llm_outputs import ListResponse
+        from docoracle.core.llm_outputs import ListResponse
 
         response = ListResponse(items=[], total_count=0)
 
@@ -195,7 +195,7 @@ class TestListResponse:
 
     def test_list_response_to_dict(self):
         """Test that ListResponse can be serialized to dict."""
-        from src.core.llm_outputs import ListResponse
+        from docoracle.core.llm_outputs import ListResponse
 
         response = ListResponse(
             items=[{"id": 1}, {"id": 2}],
@@ -211,7 +211,7 @@ class TestListResponse:
 
     def test_list_response_from_dict(self):
         """Test that ListResponse can be created from dict."""
-        from src.core.llm_outputs import ListResponse
+        from docoracle.core.llm_outputs import ListResponse
 
         data = {
             "items": [{"id": 1}, {"id": 2}],
@@ -234,7 +234,7 @@ class TestDecisionResponse:
 
     def test_valid_decision_response_yes(self):
         """Test DecisionResponse with 'yes' decision."""
-        from src.core.llm_outputs import DecisionResponse
+        from docoracle.core.llm_outputs import DecisionResponse
 
         response = DecisionResponse(
             decision="yes",
@@ -252,7 +252,7 @@ class TestDecisionResponse:
 
     def test_valid_decision_response_no(self):
         """Test DecisionResponse with 'no' decision."""
-        from src.core.llm_outputs import DecisionResponse
+        from docoracle.core.llm_outputs import DecisionResponse
 
         response = DecisionResponse(
             decision="no",
@@ -266,7 +266,7 @@ class TestDecisionResponse:
 
     def test_valid_decision_response_maybe(self):
         """Test DecisionResponse with 'maybe' decision."""
-        from src.core.llm_outputs import DecisionResponse
+        from docoracle.core.llm_outputs import DecisionResponse
 
         response = DecisionResponse(
             decision="maybe",
@@ -278,7 +278,7 @@ class TestDecisionResponse:
 
     def test_decision_response_with_empty_pros_cons(self):
         """Test DecisionResponse with empty pros and cons lists."""
-        from src.core.llm_outputs import DecisionResponse
+        from docoracle.core.llm_outputs import DecisionResponse
 
         response = DecisionResponse(
             decision="yes",
@@ -291,14 +291,14 @@ class TestDecisionResponse:
 
     def test_decision_response_missing_required_fields(self):
         """Test that missing required fields raise ValidationError."""
-        from src.core.llm_outputs import DecisionResponse
+        from docoracle.core.llm_outputs import DecisionResponse
 
         with pytest.raises(ValidationError):
             DecisionResponse()
 
     def test_decision_response_invalid_decision(self):
         """Test that invalid decision value raises ValidationError."""
-        from src.core.llm_outputs import DecisionResponse
+        from docoracle.core.llm_outputs import DecisionResponse
 
         with pytest.raises(ValidationError) as exc_info:
             DecisionResponse(
@@ -311,7 +311,7 @@ class TestDecisionResponse:
 
     def test_decision_response_missing_decision(self):
         """Test that missing decision field raises ValidationError."""
-        from src.core.llm_outputs import DecisionResponse
+        from docoracle.core.llm_outputs import DecisionResponse
 
         with pytest.raises(ValidationError) as exc_info:
             DecisionResponse(
@@ -323,7 +323,7 @@ class TestDecisionResponse:
 
     def test_decision_response_missing_reasoning(self):
         """Test that missing reasoning field raises ValidationError."""
-        from src.core.llm_outputs import DecisionResponse
+        from docoracle.core.llm_outputs import DecisionResponse
 
         with pytest.raises(ValidationError) as exc_info:
             DecisionResponse(
@@ -335,7 +335,7 @@ class TestDecisionResponse:
 
     def test_decision_response_missing_confidence(self):
         """Test that missing confidence field raises ValidationError."""
-        from src.core.llm_outputs import DecisionResponse
+        from docoracle.core.llm_outputs import DecisionResponse
 
         with pytest.raises(ValidationError) as exc_info:
             DecisionResponse(
@@ -347,7 +347,7 @@ class TestDecisionResponse:
 
     def test_decision_response_confidence_range(self):
         """Test that confidence must be between 0.0 and 1.0."""
-        from src.core.llm_outputs import DecisionResponse
+        from docoracle.core.llm_outputs import DecisionResponse
 
         # Test valid range
         response = DecisionResponse(
@@ -374,7 +374,7 @@ class TestDecisionResponse:
 
     def test_decision_response_to_dict(self):
         """Test that DecisionResponse can be serialized to dict."""
-        from src.core.llm_outputs import DecisionResponse
+        from docoracle.core.llm_outputs import DecisionResponse
 
         response = DecisionResponse(
             decision="yes",
@@ -394,7 +394,7 @@ class TestDecisionResponse:
 
     def test_decision_response_from_dict(self):
         """Test that DecisionResponse can be created from dict."""
-        from src.core.llm_outputs import DecisionResponse
+        from docoracle.core.llm_outputs import DecisionResponse
 
         data = {
             "decision": "no",
@@ -421,7 +421,7 @@ class TestJSONSerialization:
 
     def test_comparison_response_json_roundtrip(self):
         """Test JSON roundtrip for ComparisonResponse."""
-        from src.core.llm_outputs import ComparisonResponse
+        from docoracle.core.llm_outputs import ComparisonResponse
 
         original = ComparisonResponse(
             items=["A", "B"],
@@ -436,7 +436,7 @@ class TestJSONSerialization:
 
     def test_list_response_json_roundtrip(self):
         """Test JSON roundtrip for ListResponse."""
-        from src.core.llm_outputs import ListResponse
+        from docoracle.core.llm_outputs import ListResponse
 
         original = ListResponse(
             items=[{"id": 1}, {"id": 2}],
@@ -451,7 +451,7 @@ class TestJSONSerialization:
 
     def test_decision_response_json_roundtrip(self):
         """Test JSON roundtrip for DecisionResponse."""
-        from src.core.llm_outputs import DecisionResponse
+        from docoracle.core.llm_outputs import DecisionResponse
 
         original = DecisionResponse(
             decision="yes",
@@ -477,7 +477,7 @@ class TestSchemaValidation:
 
     def test_comparison_response_field_descriptions(self):
         """Test that ComparisonResponse has correct field descriptions."""
-        from src.core.llm_outputs import ComparisonResponse
+        from docoracle.core.llm_outputs import ComparisonResponse
 
         schema = ComparisonResponse.model_json_schema()
 
@@ -494,7 +494,7 @@ class TestSchemaValidation:
 
     def test_list_response_field_descriptions(self):
         """Test that ListResponse has correct field descriptions."""
-        from src.core.llm_outputs import ListResponse
+        from docoracle.core.llm_outputs import ListResponse
 
         schema = ListResponse.model_json_schema()
 
@@ -507,7 +507,7 @@ class TestSchemaValidation:
 
     def test_decision_response_field_descriptions(self):
         """Test that DecisionResponse has correct field descriptions."""
-        from src.core.llm_outputs import DecisionResponse
+        from docoracle.core.llm_outputs import DecisionResponse
 
         schema = DecisionResponse.model_json_schema()
 
