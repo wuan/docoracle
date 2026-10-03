@@ -9,7 +9,8 @@ This chunker respects the document structure by:
 - Prepending a breadcrumb header to every chunk so embeddings carry
   hierarchical context
 
-For AsciiDoc documents, conversion to Markdown happens automatically.
+Documents are expected to be Markdown already; AsciiDoc sources are
+converted to Markdown by the loader.
 """
 
 import re
@@ -19,7 +20,6 @@ from typing import Any
 
 import tiktoken
 
-from .converter import convert_asciidoc_to_markdown
 from .models import Chunk, Document
 
 # tiktoken encoders are not cheap to construct; share one per encoding name.
@@ -61,11 +61,8 @@ class Chunker:
         """
         Split a document into chunks respecting section structure.
 
-        If the document content is AsciiDoc (detected by presence of AsciiDoc
-        heading markers), it will be converted to Markdown first.
-
         Args:
-            document: Document to chunk
+            document: Document to chunk (content is expected to be Markdown)
 
         Returns:
             List of Chunk objects with metadata
@@ -75,12 +72,9 @@ class Chunker:
         if not document.content:
             return chunks
 
-        # Convert AsciiDoc to Markdown if needed
-        markdown_content = self._ensure_markdown(document.content)
-
         # Get sections with their actual content extracted from the document
         sections: list[dict[str, Any]] = self._extract_sections_from_document(
-            document, markdown_content
+            document, document.content
         )
 
         # Create chunks from sections
@@ -89,13 +83,6 @@ class Chunker:
             chunks.extend(section_chunks)  # type: ignore[arg-type]
 
         return chunks
-
-    def _ensure_markdown(self, content: str) -> str:
-        """Ensure content is Markdown, converting from AsciiDoc if needed."""
-        # Quick detection: if it has AsciiDoc heading markers, convert it
-        if re.search(r"^={1,6}\s", content, re.MULTILINE):
-            return convert_asciidoc_to_markdown(content)
-        return content
 
     def _clean_markdown(self, content: str) -> str:
         """Clean Markdown for chunking while preserving structure and text.

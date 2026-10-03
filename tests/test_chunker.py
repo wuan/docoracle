@@ -3,6 +3,7 @@
 import pytest
 
 from docoracle.core.chunker import Chunker
+from docoracle.core.converter import convert_asciidoc_to_markdown
 from docoracle.core.models import Chunk, Document
 
 
@@ -10,7 +11,8 @@ from docoracle.core.models import Chunk, Document
 def sample_document():
     """Create a sample document for testing."""
     return Document(
-        content="""= Sample Document
+        # The loader converts AsciiDoc to Markdown before chunking.
+        content=convert_asciidoc_to_markdown("""= Sample Document
 
 This is the introduction paragraph.
 
@@ -21,7 +23,7 @@ This is the content of the first section. It has multiple sentences.
 == Second Section
 
 This is the second section with more content.
-""",
+"""),
         file_path="modules/sample/pages/sample.adoc",
         module="sample",
         component="test-component",
@@ -186,40 +188,6 @@ More content.
     assert 'print("hello")' in clean  # code block body preserved
     assert "Section" in clean
     assert "More content" in clean
-
-
-def test_asciidoc_to_markdown_conversion():
-    """Test that AsciiDoc content is converted to Markdown."""
-    chunker = Chunker()
-
-    asciidoc_content = """= Title
-
-== Section
-
-Content here."""
-
-    result = chunker._ensure_markdown(asciidoc_content)
-
-    # Should be converted to Markdown
-    assert "# Title" in result
-    assert "## Section" in result
-    assert "Content here" in result
-
-
-def test_markdown_passthrough():
-    """Test that Markdown content is passed through unchanged."""
-    chunker = Chunker()
-
-    markdown_content = """# Title
-
-## Section
-
-Content here."""
-
-    result = chunker._ensure_markdown(markdown_content)
-
-    # Should remain unchanged
-    assert result == markdown_content
 
 
 def test_chunk_document_with_sections():
@@ -520,11 +488,11 @@ def test_breadcrumb_prepended_to_chunks():
     chunker = Chunker(chunk_size=500, overlap=10)
 
     document = Document(
-        content="""= Wohnungskredite
+        content=convert_asciidoc_to_markdown("""= Wohnungskredite
 
 == Kredit Oetztaler Str. 16
 
-Höhe 200.000,00 EUR, Zinssatz 3,380 Prozent.""",
+Höhe 200.000,00 EUR, Zinssatz 3,380 Prozent."""),
         file_path="finanzen/modules/ROOT/pages/Wohnungskredite.adoc",
         module="ROOT",
         component="finanzen",
@@ -566,11 +534,11 @@ def test_breadcrumb_uses_component_title_when_set():
     chunker = Chunker(chunk_size=500, overlap=10)
 
     document = Document(
-        content="""= Wohnungskredite
+        content=convert_asciidoc_to_markdown("""= Wohnungskredite
 
 == Kredit
 
-Some text.""",
+Some text."""),
         file_path="finanzen/pages/Wohnungskredite.adoc",
         module="ROOT",
         component="finanzen",
@@ -605,13 +573,13 @@ def test_breadcrumb_collapses_duplicate_doc_title():
     chunker = Chunker(chunk_size=500, overlap=10)
 
     document = Document(
-        content="""= Geldanlage
+        content=convert_asciidoc_to_markdown("""= Geldanlage
 
 Intro for Geldanlage.
 
 == Konten
 
-Konten content.""",
+Konten content."""),
         file_path="finanzen/pages/Geldanlage.adoc",
         module="ROOT",
         component="finanzen",
@@ -643,7 +611,7 @@ def test_subsection_content_not_included_in_parent():
     chunker = Chunker(chunk_size=500, overlap=10)
 
     document = Document(
-        content="""= Doc
+        content=convert_asciidoc_to_markdown("""= Doc
 
 == Parent
 
@@ -655,7 +623,7 @@ CHILD-MARKER-TEXT belongs only to the child.
 
 == Sibling
 
-Sibling content.""",
+Sibling content."""),
         file_path="test.adoc",
         module="m",
         component="c",
@@ -703,8 +671,7 @@ def test_asciidoc_table_converted_to_flat_text():
     """AsciiDoc tables should arrive at the chunk text as readable 'Header: Value' lines."""
     chunker = Chunker(chunk_size=500, overlap=10)
 
-    document = Document(
-        content="""= Konten
+    asciidoc_content = """= Konten
 
 == SSKM
 
@@ -715,7 +682,11 @@ def test_asciidoc_table_converted_to_flat_text():
 |Mieteinnahmen |€ 1060,00 |
 |Grundsteuer |€ –15,74 |€ 46,62 pro Quartal
 |===
-""",
+"""
+
+    document = Document(
+        # The loader converts AsciiDoc to Markdown before chunking.
+        content=convert_asciidoc_to_markdown(asciidoc_content),
         file_path="finanzen/pages/Geldanlage.adoc",
         module="ROOT",
         component="finanzen",
