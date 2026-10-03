@@ -308,9 +308,7 @@ def test_search_sets_backend_mode_and_module_filter(client: TestClient, fake_par
     )
     assert response.status_code == 200
     assert fake_parts.backend.default_mode == "bm25"
-    assert fake_parts.backend.related_calls == [
-        {"text": "q", "k": 3, "module": "nav"}
-    ]
+    assert fake_parts.backend.related_calls == [{"text": "q", "k": 3, "module": "nav"}]
 
 
 # -----------------------------------------------------------------------------
