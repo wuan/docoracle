@@ -31,8 +31,8 @@ from pydantic_ai.models import Model
 from pydantic_ai.models.openai import OpenAIChatModel
 from pydantic_ai.providers.openai import OpenAIProvider
 
-from src.core.config import Config, get_config, resolve_api_key
-from src.core.llm_outputs import AnswerResponse
+from docoracle.core.config import Config, get_config, resolve_api_key
+from docoracle.core.llm_outputs import AnswerResponse
 
 
 def _model_name(value: str) -> str:

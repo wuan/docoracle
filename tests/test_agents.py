@@ -9,17 +9,17 @@ import pytest
 from pydantic_ai import Tool
 from pydantic_ai.messages import ToolCallPart, ToolReturnPart
 
-from src.backends.agent import (
+from docoracle.backends.agent import (
     QAAgent,
     RetrievalState,
     RetrievalTool,
     SummaryTool,
     create_qa_agent,
 )
-from src.core.config import Config
-from src.core.llm_outputs import AnswerResponse
-from src.core.models import Chunk
-from src.core.search_index import ScoredChunk
+from docoracle.core.config import Config
+from docoracle.core.llm_outputs import AnswerResponse
+from docoracle.core.models import Chunk
+from docoracle.core.search_index import ScoredChunk
 
 # =============================================================================
 # FIXTURES
@@ -256,7 +256,7 @@ class FakeAgent:
 
 
 def _make_agent(mock_searcher: MockSearcher, mock_llm_client: MockLLMClient) -> QAAgent:
-    with patch("src.backends.agent.resolve_api_key", return_value="test-key"):
+    with patch("docoracle.backends.agent.resolve_api_key", return_value="test-key"):
         return QAAgent(mock_searcher, llm_client=mock_llm_client)
 
 
@@ -380,7 +380,7 @@ class TestQAAgentParity:
         mock_llm_client: MockLLMClient,
         config: Config,
     ) -> QAAgent:
-        with patch("src.backends.agent.resolve_api_key", return_value="test-key"):
+        with patch("docoracle.backends.agent.resolve_api_key", return_value="test-key"):
             return QAAgent(mock_searcher, llm_client=mock_llm_client, config=config)
 
     def test_default_mode_and_k_come_from_config(
@@ -443,7 +443,7 @@ class TestCreateQAAgent:
     def test_create_qa_agent_returns_qa_agent(
         self, mock_searcher: MockSearcher, mock_llm_client: MockLLMClient
     ) -> None:
-        with patch("src.backends.agent.resolve_api_key", return_value="test-key"):
+        with patch("docoracle.backends.agent.resolve_api_key", return_value="test-key"):
             qa = create_qa_agent(mock_searcher, llm_client=mock_llm_client)
 
         assert isinstance(qa, QAAgent)

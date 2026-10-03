@@ -1,7 +1,7 @@
 """Tests for the metadata filter primitive."""
 
-from src.core.models import Chunk
-from src.core.search_index import matches_filters
+from docoracle.core.models import Chunk
+from docoracle.core.search_index import matches_filters
 
 
 def _chunk(module: str = "m", component: str = "c", version: str = "1.0") -> Chunk:

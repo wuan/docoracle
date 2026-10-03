@@ -2,7 +2,7 @@
 
 The engine always retrieves once and generates once from the retrieved chunks,
 honoring the configured retrieval mode and hyperparameters. It implements the
-shared :class:`~src.backends.protocol.AnswerBackend` interface so the CLI and
+shared :class:`~docoracle.backends.protocol.AnswerBackend` interface so the CLI and
 HTTP server can select it without knowing its concrete type.
 """
 

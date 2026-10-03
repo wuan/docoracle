@@ -12,9 +12,9 @@ from unittest.mock import patch
 import pytest
 from pydantic import BaseModel, Field
 
-from src.api.structured_llm_client import StructuredLLMClient, _event_to_text
-from src.core.config import resolve_api_key
-from src.core.llm_outputs import AnswerResponse
+from docoracle.api.structured_llm_client import StructuredLLMClient, _event_to_text
+from docoracle.core.config import resolve_api_key
+from docoracle.core.llm_outputs import AnswerResponse
 
 # =============================================================================
 # FIXTURES / HELPERS
@@ -23,7 +23,7 @@ from src.core.llm_outputs import AnswerResponse
 
 @pytest.fixture
 def mock_config():
-    from src.core.config import Config
+    from docoracle.core.config import Config
 
     return Config(
         generation={"model": "mistral-small-latest", "temperature": 0.3},
@@ -185,7 +185,7 @@ class TestNativeStructuredOutput:
         client = _make_client(mock_config)
         expected = AnswerResponse(answer="yes", confidence=0.9, citations=["a"])
         FakeAgent.output = expected
-        with patch("src.api.structured_llm_client.Agent", FakeAgent):
+        with patch("docoracle.api.structured_llm_client.Agent", FakeAgent):
             result = client.ask("Q?", "ctx")
 
         assert result is expected
@@ -194,7 +194,7 @@ class TestNativeStructuredOutput:
         client = _make_client(mock_config)
         expected = CustomResponse(summary="short", tags=["x"])
         FakeAgent.output = expected
-        with patch("src.api.structured_llm_client.Agent", FakeAgent):
+        with patch("docoracle.api.structured_llm_client.Agent", FakeAgent):
             result = client.ask("Q?", "ctx", output_model=CustomResponse)
 
         assert result is expected
@@ -204,7 +204,7 @@ class TestNativeStructuredOutput:
     def test_ask_uses_configured_system_prompt_by_default(self, mock_config):
         client = _make_client(mock_config)
         FakeAgent.output = AnswerResponse(answer="x")
-        with patch("src.api.structured_llm_client.Agent", FakeAgent):
+        with patch("docoracle.api.structured_llm_client.Agent", FakeAgent):
             client.ask("Q?", "ctx")
 
         assert FakeAgent.last_init["instructions"] == mock_config.prompts.system
@@ -212,7 +212,7 @@ class TestNativeStructuredOutput:
     def test_ask_system_override(self, mock_config):
         client = _make_client(mock_config)
         FakeAgent.output = AnswerResponse(answer="x")
-        with patch("src.api.structured_llm_client.Agent", FakeAgent):
+        with patch("docoracle.api.structured_llm_client.Agent", FakeAgent):
             client.ask("Q?", "ctx", system="You are a pirate.")
 
         assert FakeAgent.last_init["instructions"] == "You are a pirate."
@@ -220,7 +220,7 @@ class TestNativeStructuredOutput:
     def test_ask_prompt_includes_question_and_context(self, mock_config):
         client = _make_client(mock_config)
         FakeAgent.output = AnswerResponse(answer="x")
-        with patch("src.api.structured_llm_client.Agent", FakeAgent):
+        with patch("docoracle.api.structured_llm_client.Agent", FakeAgent):
             client.ask("What is X?", "the context")
 
         prompt = FakeAgent.last_run["prompt"]
@@ -230,7 +230,7 @@ class TestNativeStructuredOutput:
     def test_ask_forwards_temperature(self, mock_config):
         client = _make_client(mock_config)
         FakeAgent.output = AnswerResponse(answer="x")
-        with patch("src.api.structured_llm_client.Agent", FakeAgent):
+        with patch("docoracle.api.structured_llm_client.Agent", FakeAgent):
             client.ask("Q?", "ctx")
 
         assert FakeAgent.last_run["model_settings"]["temperature"] == 0.3
@@ -239,7 +239,7 @@ class TestNativeStructuredOutput:
         client = _make_client(mock_config)
         expected = CustomResponse(summary="async ok")
         FakeAgent.output = expected
-        with patch("src.api.structured_llm_client.Agent", FakeAgent):
+        with patch("docoracle.api.structured_llm_client.Agent", FakeAgent):
             result = asyncio.run(client.ask_async("Q?", "ctx", output_model=CustomResponse))
 
         assert result is expected
@@ -249,7 +249,7 @@ class TestNativeStructuredOutput:
         client = _make_client(mock_config)
         FakeAgent.error = RuntimeError("model did not conform to schema")
         with (
-            patch("src.api.structured_llm_client.Agent", FakeAgent),
+            patch("docoracle.api.structured_llm_client.Agent", FakeAgent),
             pytest.raises(RuntimeError, match="did not conform"),
         ):
             client.ask("Q?", "ctx")
@@ -277,7 +277,7 @@ class TestStreaming:
             PartDeltaEvent(index=0, delta=delta, event_kind="part_delta"),
         ]
         with patch(
-            "src.api.structured_llm_client.model_request_stream_sync",
+            "docoracle.api.structured_llm_client.model_request_stream_sync",
             return_value=FakeStream(events),
         ):
             chunks = list(client.stream_ask("Q", "ctx"))
@@ -293,7 +293,7 @@ class TestStreaming:
             PartStartEvent(index=0, part=part, previous_part_kind=None, event_kind="part_start"),
         ]
         with patch(
-            "src.api.structured_llm_client.model_request_stream",
+            "docoracle.api.structured_llm_client.model_request_stream",
             return_value=FakeAsyncStream(events),
         ):
 
@@ -379,11 +379,11 @@ class FakeEngineLLM:
 def _build_engine(llm_client):
     import uuid
 
-    from src.backends.engine import QAEngine
-    from src.core.bm25_index import BM25Index
-    from src.core.hybrid_searcher import HybridSearcher
-    from src.core.models import Chunk
-    from src.core.semantic_index import SemanticIndex
+    from docoracle.backends.engine import QAEngine
+    from docoracle.core.bm25_index import BM25Index
+    from docoracle.core.hybrid_searcher import HybridSearcher
+    from docoracle.core.models import Chunk
+    from docoracle.core.semantic_index import SemanticIndex
 
     chunk = Chunk(
         text="alpha bravo charlie",

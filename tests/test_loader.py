@@ -6,8 +6,8 @@ from pathlib import Path
 
 import pytest
 
-from src.core.loader import AntoraLoader
-from src.core.models import Document
+from docoracle.core.loader import AntoraLoader
+from docoracle.core.models import Document
 
 
 @pytest.fixture

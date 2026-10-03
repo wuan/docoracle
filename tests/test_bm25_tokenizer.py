@@ -1,6 +1,6 @@
 """Tests for the BM25 tokenizer."""
 
-from src.core.bm25_index import GERMAN_STOPWORDS, BM25Index
+from docoracle.core.bm25_index import GERMAN_STOPWORDS, BM25Index
 
 
 def test_stemming_collapses_inflected_plural_forms():

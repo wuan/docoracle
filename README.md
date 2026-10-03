@@ -271,27 +271,28 @@ Use `--https` to keep the original HTTPS URLs.
 ```
 docoracle/
 ├── src/
-│   ├── core/
-│   │   ├── __init__.py
-│   │   ├── models.py           # Data models (Chunk, Document) - Pydantic
-│   │   ├── config.py          # Configuration management - Pydantic
-│   │   ├── llm_outputs.py     # Structured LLM output models
-│   │   ├── loader.py          # Antora-aware AsciiDoc loader
-│   │   ├── chunker.py         # Text chunker
-│   │   ├── converter.py       # AsciiDoc -> Markdown conversion
-│   │   ├── search_index.py    # SearchIndex Protocol, ScoredChunk, matches_filters
-│   │   ├── semantic_index.py  # FAISS-backed semantic index
-│   │   ├── bm25_index.py      # BM25 lexical index (German tokenizer)
-│   │   └── hybrid_searcher.py # Composes semantic + BM25 via RRF
-│   ├── backends/              # Interchangeable answer backends
-│   │   ├── protocol.py        # AnswerBackend Protocol + shared result builder
-│   │   ├── engine.py          # QAEngine: retrieve-then-answer
-│   │   ├── agent.py           # QAAgent: tool-using pydantic-ai agent
-│   │   └── factory.py         # create_answer_backend (config-driven)
-│   ├── api/
-│   │   └── structured_llm_client.py  # Embeddings, chat, native structured output
-│   ├── server/                # FastAPI app + static UI
-│   └── cli.py                 # CLI interface
+│   └── docoracle/
+│       ├── core/
+│       │   ├── __init__.py
+│       │   ├── models.py           # Data models (Chunk, Document) - Pydantic
+│       │   ├── config.py          # Configuration management - Pydantic
+│       │   ├── llm_outputs.py     # Structured LLM output models
+│       │   ├── loader.py          # Antora-aware AsciiDoc loader
+│       │   ├── chunker.py         # Text chunker
+│       │   ├── converter.py       # AsciiDoc -> Markdown conversion
+│       │   ├── search_index.py    # SearchIndex Protocol, ScoredChunk, matches_filters
+│       │   ├── semantic_index.py  # FAISS-backed semantic index
+│       │   ├── bm25_index.py      # BM25 lexical index (German tokenizer)
+│       │   └── hybrid_searcher.py # Composes semantic + BM25 via RRF
+│       ├── backends/              # Interchangeable answer backends
+│       │   ├── protocol.py        # AnswerBackend Protocol + shared result builder
+│       │   ├── engine.py          # QAEngine: retrieve-then-answer
+│       │   ├── agent.py           # QAAgent: tool-using pydantic-ai agent
+│       │   └── factory.py         # create_answer_backend (config-driven)
+│       ├── api/
+│       │   └── structured_llm_client.py  # Embeddings, chat, native structured output
+│       ├── server/                # FastAPI app + static UI
+│       └── cli.py                 # CLI interface
 ├── tests/
 ├── data/
 │   ├── raw/                   # Original files (optional)
@@ -368,7 +369,7 @@ prompts:
 
 ## Answer Backends
 
-Two interchangeable answer backends live under `src/backends/`. Select one with
+Two interchangeable answer backends live under `src/docoracle/backends/`. Select one with
 `docoracle.backend` in `config.yaml`; both honor the same retrieval inputs and return
 the same detailed result shape, so the CLI and HTTP API are backend-agnostic.
 

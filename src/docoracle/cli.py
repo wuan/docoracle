@@ -6,15 +6,15 @@ from typing import Any
 import click
 from dotenv import load_dotenv
 
-from src.api.structured_llm_client import StructuredLLMClient
-from src.backends.factory import create_answer_backend
-from src.backends.protocol import AnswerBackend
-from src.core.bm25_index import BM25Index
-from src.core.config import Config, get_config
-from src.core.hybrid_searcher import HybridSearcher
-from src.core.loader import AntoraLoader
-from src.core.models import Chunk
-from src.core.search_index import ScoredChunk
+from docoracle.api.structured_llm_client import StructuredLLMClient
+from docoracle.backends.factory import create_answer_backend
+from docoracle.backends.protocol import AnswerBackend
+from docoracle.core.bm25_index import BM25Index
+from docoracle.core.config import Config, get_config
+from docoracle.core.hybrid_searcher import HybridSearcher
+from docoracle.core.loader import AntoraLoader
+from docoracle.core.models import Chunk
+from docoracle.core.search_index import ScoredChunk
 
 # Load environment variables from .env file
 load_dotenv()

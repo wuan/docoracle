@@ -2,9 +2,9 @@
 
 import uuid
 
-from src.core.hybrid_searcher import HybridSearcher
-from src.core.models import Chunk
-from src.core.search_index import ScoredChunk
+from docoracle.core.hybrid_searcher import HybridSearcher
+from docoracle.core.models import Chunk
+from docoracle.core.search_index import ScoredChunk
 
 
 def _make_chunk(text: str) -> Chunk:

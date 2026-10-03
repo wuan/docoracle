@@ -10,21 +10,21 @@ from unittest.mock import patch
 import pytest
 from pydantic import ValidationError
 
-from src.backends.agent import QAAgent
-from src.backends.engine import QAEngine
-from src.backends.factory import create_answer_backend
-from src.backends.protocol import (
+from docoracle.backends.agent import QAAgent
+from docoracle.backends.engine import QAEngine
+from docoracle.backends.factory import create_answer_backend
+from docoracle.backends.protocol import (
     AnswerBackend,
     build_answer_result,
     build_filters,
     dedupe_scored_chunks,
 )
-from src.core.bm25_index import BM25Index
-from src.core.config import Config
-from src.core.hybrid_searcher import HybridSearcher
-from src.core.llm_outputs import AnswerResponse
-from src.core.models import Chunk
-from src.core.semantic_index import SemanticIndex
+from docoracle.core.bm25_index import BM25Index
+from docoracle.core.config import Config
+from docoracle.core.hybrid_searcher import HybridSearcher
+from docoracle.core.llm_outputs import AnswerResponse
+from docoracle.core.models import Chunk
+from docoracle.core.semantic_index import SemanticIndex
 
 
 class _LLM:
@@ -53,7 +53,7 @@ def _searcher() -> HybridSearcher:
 
 
 def _scored(chunk_id: str, rank: int) -> Any:
-    from src.core.search_index import ScoredChunk
+    from docoracle.core.search_index import ScoredChunk
 
     chunk = Chunk(
         text="text",
@@ -78,7 +78,7 @@ def test_engine_satisfies_protocol() -> None:
 
 
 def test_agent_satisfies_protocol() -> None:
-    with patch("src.backends.agent.resolve_api_key", return_value="test-key"):
+    with patch("docoracle.backends.agent.resolve_api_key", return_value="test-key"):
         agent = QAAgent(_searcher(), llm_client=_LLM(), config=Config())
     assert isinstance(agent, AnswerBackend)
 
@@ -173,7 +173,7 @@ def test_factory_returns_engine_by_default() -> None:
 
 def test_factory_returns_agent_when_configured() -> None:
     config = Config(docoracle={"backend": "agent"})  # type: ignore[arg-type]
-    with patch("src.backends.agent.resolve_api_key", return_value="test-key"):
+    with patch("docoracle.backends.agent.resolve_api_key", return_value="test-key"):
         backend = create_answer_backend(_searcher(), _LLM(), config)
     assert isinstance(backend, QAAgent)
 
@@ -211,7 +211,7 @@ def test_engine_and_agent_emit_same_field_set() -> None:
     engine = QAEngine(searcher, _LLM(), config=Config())
     engine_result = engine.ask_detailed("alpha", k=1, retrieval="bm25")
 
-    with patch("src.backends.agent.resolve_api_key", return_value="test-key"):
+    with patch("docoracle.backends.agent.resolve_api_key", return_value="test-key"):
         agent = QAAgent(searcher, llm_client=_LLM(), config=Config())
     agent_result = _FakeAgentBackend(agent, response).run(question="alpha", k=1, retrieval="bm25")
 
@@ -224,7 +224,7 @@ def test_agent_backend_async_path_returns_result() -> None:
     from tests.test_agents import FakeAgent
 
     config = Config(docoracle={"backend": "agent"})  # type: ignore[arg-type]
-    with patch("src.backends.agent.resolve_api_key", return_value="test-key"):
+    with patch("docoracle.backends.agent.resolve_api_key", return_value="test-key"):
         backend = create_answer_backend(_searcher(), _LLM(), config)
 
     backend.agent = FakeAgent(AnswerResponse(answer="async"))  # type: ignore[attr-defined]

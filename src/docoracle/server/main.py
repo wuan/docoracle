@@ -11,13 +11,13 @@ from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
-from src.api.structured_llm_client import StructuredLLMClient
-from src.backends.factory import create_answer_backend
-from src.backends.protocol import AnswerBackend
-from src.core.config import Config, get_config
-from src.core.hybrid_searcher import VALID_MODES, HybridSearcher
-from src.core.loader import AntoraLoader
-from src.core.models import Chunk
+from docoracle.api.structured_llm_client import StructuredLLMClient
+from docoracle.backends.factory import create_answer_backend
+from docoracle.backends.protocol import AnswerBackend
+from docoracle.core.config import Config, get_config
+from docoracle.core.hybrid_searcher import VALID_MODES, HybridSearcher
+from docoracle.core.loader import AntoraLoader
+from docoracle.core.models import Chunk
 
 # Load environment variables from .env file
 load_dotenv()

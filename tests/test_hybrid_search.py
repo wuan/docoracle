@@ -5,8 +5,8 @@ import uuid
 import numpy as np
 import pytest
 
-from src.core.hybrid_searcher import HybridSearcher
-from src.core.models import Chunk
+from docoracle.core.hybrid_searcher import HybridSearcher
+from docoracle.core.models import Chunk
 
 
 @pytest.fixture

@@ -2,7 +2,7 @@
 
 from click.testing import CliRunner
 
-from src.cli import cli
+from docoracle.cli import cli
 
 
 def test_ask_with_invalid_retrieval_mode_reports_error():
