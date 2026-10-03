@@ -1,5 +1,6 @@
 """FastAPI backend server for DocOracle."""
 
+import asyncio
 import logging
 from pathlib import Path
 from typing import Any, Literal
@@ -375,8 +376,8 @@ async def serve_ui():
     ui_path = static_dir / "ui.html"
     headers = {"Cache-Control": "no-store, max-age=0"}
     if ui_path.exists():
-        with open(ui_path) as f:
-            html_content = f.read()
+        # Read in a worker thread so the sync file I/O does not block the event loop.
+        html_content = await asyncio.to_thread(ui_path.read_text, encoding="utf-8")
         return HTMLResponse(
             content=html_content,
             status_code=200,
