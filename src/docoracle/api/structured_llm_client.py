@@ -322,9 +322,8 @@ class StructuredLLMClient:
     ) -> list[list[float]]:
         """Embed ``texts`` one-by-one or as a single batch call.
 
-        Mirrors the fallback semantics of the legacy :class:`LLMClient`: try
-        the batch call first, fall back to per-text calls if the API rejects
-        the batch shape.
+        Try the batch call first, fall back to per-text calls if the API
+        rejects the batch shape.
         """
         if not texts:
             return []

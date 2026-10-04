@@ -106,10 +106,8 @@ def test_bm25_search_works_after_roundtrip():
 def test_load_returns_false_on_incompatible_chunks_pickle(capsys):
     """Stale chunks.pkl from a previous Chunk schema must not crash load().
 
-    Regression test: previously, loading a pickle whose Chunks lacked
-    ``chunk_id`` raised a bare AttributeError deep inside the searcher.
-    Now load() should detect the mismatch, warn, and return False so
-    the CLI can re-ingest.
+    load() detects the mismatch, warns, and returns False so the CLI
+    can re-ingest.
     """
     import pickle
 
@@ -117,8 +115,7 @@ def test_load_returns_false_on_incompatible_chunks_pickle(capsys):
 
     with tempfile.TemporaryDirectory() as tmp:
         # Build a Chunk via the current schema, then strip chunk_id from
-        # its __dict__ to simulate a pickle produced by an older code
-        # version where the field was absent.
+        # its __dict__ to simulate a stale pickle missing the field.
         stale = Chunk(
             text="stale",
             chunk_id="ignored",

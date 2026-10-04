@@ -263,7 +263,7 @@ docoracle components --antora-root antora-docs --clone --target-dir ./all-docs
 ```
 
 **Note:** HTTPS URLs are automatically converted to SSH format (e.g.,
-`https://git.tryb.de/doc/site` → `git@git.tryb.de:doc/site.git`).
+`https://git.example.com/doc/site` → `git@git.example.com:doc/site.git`).
 Use `--https` to keep the original HTTPS URLs.
 
 ## Project Structure

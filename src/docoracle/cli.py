@@ -514,10 +514,10 @@ def convert_to_ssh(git_url: str) -> str:
     """Convert HTTPS Git URL to SSH format.
 
     Examples:
-        https://git.tryb.de/doc/site -> git@git.tryb.de:doc/site.git
-        https://git.tryb.de/doc/site.git -> git@git.tryb.de:doc/site.git
-        https://git.tryb.de/doc/site/ -> git@git.tryb.de:doc/site.git
-        git@git.tryb.de:doc/site.git -> git@git.tryb.de:doc/site.git
+        https://git.example.com/doc/site -> git@git.example.com:doc/site.git
+        https://git.example.com/doc/site.git -> git@git.example.com:doc/site.git
+        https://git.example.com/doc/site/ -> git@git.example.com:doc/site.git
+        git@git.example.com:doc/site.git -> git@git.example.com:doc/site.git
     """
     git_url = git_url.strip()
 

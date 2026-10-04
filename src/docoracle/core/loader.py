@@ -10,6 +10,7 @@ from typing import Any
 
 import yaml
 
+from .converter import convert_asciidoc_to_markdown
 from .models import Document
 
 
@@ -309,8 +310,15 @@ class AntoraLoader:
             # Extract sections with IDs
             sections = self._extract_sections(raw_content)
 
+            # Normalize to Markdown here so everything downstream (chunker,
+            # embeddings) works on a single format. Content without AsciiDoc
+            # heading markers (e.g. already-Markdown pages) passes through.
+            content = raw_content
+            if re.search(r"^={1,6}\s", raw_content, re.MULTILINE):
+                content = convert_asciidoc_to_markdown(raw_content)
+
             return Document(
-                content=raw_content,
+                content=content,
                 file_path=str(file_path.relative_to(self.antora_root)),
                 module=module,
                 component=self.component_name or "unknown",
