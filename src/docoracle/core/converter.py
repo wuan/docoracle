@@ -91,7 +91,7 @@ def _convert_asciidoc_to_markdown_regex(content: str) -> str:
     # Convert xref macros
     # AsciiDoc: xref:[module::]path/page.adoc[label]  -> [label](page)
     # When the label is empty, fall back to the page name (without extension).
-    # Paths may contain spaces (e.g., ``Jahre/Steuer 2024.adoc``), so the
+    # Paths may contain spaces (e.g., ``Archive/Report 2024.adoc``), so the
     # target pattern only excludes ``[`` and newline.
     content = re.sub(r"xref:([^\[\n]+?)\[([^\]]*)\]", _convert_xref, content)
 

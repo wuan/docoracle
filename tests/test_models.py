@@ -110,12 +110,12 @@ def _chunk(**overrides) -> Chunk:
         "text": "t",
         "chunk_id": "c",
         "module": "ROOT",
-        "component": "finanzen",
+        "component": "docs",
         "version": "latest",
-        "page_id": "ROOT:pages:Geldanlage",
+        "page_id": "ROOT:pages:Guide",
         "section_id": None,
         "section_title": None,
-        "source_file": "modules/ROOT/pages/Geldanlage.adoc",
+        "source_file": "modules/ROOT/pages/Guide.adoc",
     }
     defaults.update(overrides)
     return Chunk(**defaults)
@@ -123,45 +123,43 @@ def _chunk(**overrides) -> Chunk:
 
 def test_site_url_default_strategy():
     """Version is always included; ROOT module is elided."""
-    url = _chunk().site_url("https://doc.tryb.de")
-    assert url == "https://doc.tryb.de/finanzen/latest/Geldanlage.html"
+    url = _chunk().site_url("https://docs.example.com")
+    assert url == "https://docs.example.com/docs/latest/Guide.html"
 
 
 def test_site_url_includes_non_root_module():
-    # Mirrors the real-site URL the user supplied:
-    # https://doc.tryb.de/allgemein/latest/Garten/Pflanzgeschichte.html
     url = _chunk(
-        component="allgemein",
-        module="Garten",
-        source_file="modules/Garten/pages/Pflanzgeschichte.adoc",
-    ).site_url("https://doc.tryb.de")
-    assert url == "https://doc.tryb.de/allgemein/latest/Garten/Pflanzgeschichte.html"
+        component="docs",
+        module="Archive",
+        source_file="modules/Archive/pages/History.adoc",
+    ).site_url("https://docs.example.com")
+    assert url == "https://docs.example.com/docs/latest/Archive/History.html"
 
 
 def test_site_url_includes_non_latest_version():
-    url = _chunk(version="2.1").site_url("https://doc.tryb.de")
-    assert url == "https://doc.tryb.de/finanzen/2.1/Geldanlage.html"
+    url = _chunk(version="2.1").site_url("https://docs.example.com")
+    assert url == "https://docs.example.com/docs/2.1/Guide.html"
 
 
 def test_site_url_encodes_spaces_in_page_name():
     url = _chunk(
-        module="Steuer",
-        source_file="modules/Steuer/pages/dauerhafte Spenden.adoc",
-    ).site_url("https://doc.tryb.de")
-    assert url == "https://doc.tryb.de/finanzen/latest/Steuer/dauerhafte%20Spenden.html"
+        module="Reports",
+        source_file="modules/Reports/pages/Annual Report.adoc",
+    ).site_url("https://docs.example.com")
+    assert url == "https://docs.example.com/docs/latest/Reports/Annual%20Report.html"
 
 
 def test_site_url_preserves_subdirectories():
     url = _chunk(
-        module="Steuer",
-        source_file="modules/Steuer/pages/Jahre/Steuer 2024.adoc",
-    ).site_url("https://doc.tryb.de")
-    assert url == "https://doc.tryb.de/finanzen/latest/Steuer/Jahre/Steuer%202024.html"
+        module="Reports",
+        source_file="modules/Reports/pages/Archive/Report 2024.adoc",
+    ).site_url("https://docs.example.com")
+    assert url == "https://docs.example.com/docs/latest/Reports/Archive/Report%202024.html"
 
 
 def test_site_url_appends_section_anchor():
-    url = _chunk(section_id="konten").site_url("https://doc.tryb.de")
-    assert url == "https://doc.tryb.de/finanzen/latest/Geldanlage.html#konten"
+    url = _chunk(section_id="sections").site_url("https://docs.example.com")
+    assert url == "https://docs.example.com/docs/latest/Guide.html#sections"
 
 
 def test_site_url_returns_none_without_base():
@@ -170,14 +168,14 @@ def test_site_url_returns_none_without_base():
 
 
 def test_site_url_returns_none_without_source_file():
-    assert _chunk(source_file=None).site_url("https://doc.tryb.de") is None
+    assert _chunk(source_file=None).site_url("https://docs.example.com") is None
 
 
 def test_site_url_returns_none_when_path_lacks_pages_segment():
     # Some loaders set source_file to just a filename; nothing safe to derive.
-    assert _chunk(source_file="Geldanlage.adoc").site_url("https://doc.tryb.de") is None
+    assert _chunk(source_file="Guide.adoc").site_url("https://docs.example.com") is None
 
 
 def test_site_url_strips_trailing_slash_from_base():
-    url = _chunk().site_url("https://doc.tryb.de/")
-    assert url == "https://doc.tryb.de/finanzen/latest/Geldanlage.html"
+    url = _chunk().site_url("https://docs.example.com/")
+    assert url == "https://docs.example.com/docs/latest/Guide.html"
