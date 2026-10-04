@@ -120,6 +120,7 @@ def build_answer_result(
                 "text": r.chunk.text[:200] + "..." if len(r.chunk.text) > 200 else r.chunk.text,
                 "module": r.chunk.module,
                 "component": r.chunk.component,
+                "breadcrumb": r.chunk.breadcrumb,
                 "section_title": r.chunk.section_title,
                 "sources": r.sources,
             }

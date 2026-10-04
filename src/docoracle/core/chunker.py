@@ -474,6 +474,7 @@ class Chunker:
             metadata={
                 "chunk_index": chunk_index,
                 "total_chunks": total_chunks,
+                "component_title": document.component_title,
                 "document_title": document.title,
                 "section_path": section_path or [],
                 "section_path_titles": section_path_titles or [],

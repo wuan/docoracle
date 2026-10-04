@@ -100,6 +100,7 @@ class SourceLink(BaseModel):
     url: str | None = None
     module: str
     component: str
+    breadcrumb: str | None = None
     section_title: str | None = None
     text_preview: str
     sources: dict[str, int] = Field(
@@ -301,6 +302,7 @@ async def ask(request: AskRequest):
                 url=chunk.get("url"),
                 module=chunk["module"],
                 component=chunk.get("component", "unknown"),
+                breadcrumb=chunk.get("breadcrumb"),
                 section_title=chunk.get("section_title"),
                 text_preview=chunk["text"][:200] + "..."
                 if len(chunk["text"]) > 200

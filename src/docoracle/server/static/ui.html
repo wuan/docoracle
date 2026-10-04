@@ -796,9 +796,10 @@
                     sourcesDiv.innerHTML = `
                         <h3>Sources (${escapeHtml(data.retrieved_count)} retrieved)</h3>
                         ${data.source_details.map(src => {
-                            const label = src.section_title
-                                ? `${src.component} > ${src.module} > ${src.section_title}`
-                                : `${src.component} > ${src.module}`;
+                            const label = src.breadcrumb
+                                || (src.section_title
+                                    ? `${src.component} > ${src.module} > ${src.section_title}`
+                                    : `${src.component} > ${src.module}`);
                             const linkHtml = src.url
                                 ? `<a href="${escapeHtml(src.url)}" class="source-link" target="_blank" rel="noopener noreferrer">${escapeHtml(label)}</a>`
                                 : `<a href="#" class="source-link" data-link="${escapeHtml(src.link)}">${escapeHtml(src.link)}</a>`;

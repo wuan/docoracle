@@ -176,6 +176,41 @@ def test_site_url_returns_none_when_path_lacks_pages_segment():
     assert _chunk(source_file="Guide.adoc").site_url("https://docs.example.com") is None
 
 
+def test_breadcrumb_uses_component_title_and_omits_root():
+    chunk = _chunk(
+        section_title="Details",
+        metadata={
+            "component_title": "Docs",
+            "document_title": "Guide",
+            "section_path_titles": [],
+        },
+    )
+    assert chunk.breadcrumb == "Docs > Guide > Details"
+
+
+def test_breadcrumb_includes_non_root_module():
+    chunk = _chunk(
+        module="Archive",
+        metadata={"document_title": "History"},
+    )
+    assert chunk.breadcrumb == "docs > Archive > History"
+
+
+def test_breadcrumb_collapses_duplicate_doc_title():
+    chunk = _chunk(
+        section_title="Guide",
+        metadata={
+            "document_title": "Guide",
+            "section_path_titles": ["Guide"],
+        },
+    )
+    assert chunk.breadcrumb == "docs > Guide"
+
+
+def test_breadcrumb_falls_back_to_component_id():
+    assert _chunk().breadcrumb == "docs"
+
+
 def test_site_url_strips_trailing_slash_from_base():
     url = _chunk().site_url("https://docs.example.com/")
     assert url == "https://docs.example.com/docs/latest/Guide.html"

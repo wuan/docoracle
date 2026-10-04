@@ -44,6 +44,36 @@ class Chunk(BaseModel):
             return f"{self.page_id}#{self.section_id}"
         return self.page_id
 
+    @property
+    def breadcrumb(self) -> str | None:
+        """Human-readable breadcrumb for UI display.
+
+        Mirrors the breadcrumb the chunker prepends to ``text``: component
+        display title (falling back to the identifier), module (omitted for
+        ``ROOT``), document title, then section titles. Consecutive duplicates
+        are collapsed.
+        """
+        parts: list[str] = []
+        label = self.metadata.get("component_title") or self.component
+        if label:
+            parts.append(label)
+        if self.module and self.module not in ("ROOT", label):
+            parts.append(self.module)
+        document_title = self.metadata.get("document_title")
+        if document_title:
+            parts.append(document_title)
+        for t in self.metadata.get("section_path_titles") or []:
+            if t:
+                parts.append(t)
+        if self.section_title:
+            parts.append(self.section_title)
+
+        deduped: list[str] = []
+        for p in parts:
+            if not deduped or deduped[-1] != p:
+                deduped.append(p)
+        return " > ".join(deduped) or None
+
     def site_url(self, base_url: str | None) -> str | None:
         """Build the Antora-style URL for this chunk's page on the published site.
 
