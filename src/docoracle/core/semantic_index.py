@@ -22,6 +22,9 @@ import numpy as np  # type: ignore[import-untyped]
 from .models import Chunk
 from .search_index import ScoredChunk, matches_filters
 
+_FLAT_INDEX_MAX_VECTORS = 10_000
+_MIN_POINTS_PER_CENTROID = 39
+
 
 class SemanticIndex:
     """FAISS-backed semantic similarity index."""
@@ -49,7 +52,10 @@ class SemanticIndex:
         vectors = np.array(embeddings, dtype=np.float32)
 
         if self.index is None:
-            nlist = min(100, len(chunks))
+            if len(chunks) < _FLAT_INDEX_MAX_VECTORS:
+                nlist = 0
+            else:
+                nlist = min(100, len(chunks) // _MIN_POINTS_PER_CENTROID)
             self._init_index(vectors.shape[1], nlist=nlist)
 
         if isinstance(self.index, faiss.IndexIVFFlat):  # type: ignore[arg-type]
