@@ -277,7 +277,7 @@ class Chunker:
         component_label = document.component_title or document.component
         if component_label:
             parts.append(component_label)
-        if document.module and document.module != component_label:
+        if document.module and document.module not in ("ROOT", component_label):
             parts.append(document.module)
         if document.title:
             parts.append(document.title)

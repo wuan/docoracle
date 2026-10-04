@@ -521,7 +521,7 @@ Some sample content for the details section."""),
     details_chunks = [c for c in chunks if c.section_id == "details"]
     assert details_chunks, "child section should produce a chunk"
 
-    breadcrumb = "docs > ROOT > Overview > Details"
+    breadcrumb = "docs > Overview > Details"
     assert details_chunks[0].text.startswith(breadcrumb), (
         f"chunk should start with breadcrumb, got: {details_chunks[0].text[:120]}"
     )
