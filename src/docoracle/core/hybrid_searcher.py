@@ -13,6 +13,7 @@ single store directory.
 
 from __future__ import annotations
 
+import importlib
 import pickle
 import sys
 from pathlib import Path
@@ -26,6 +27,28 @@ from .search_index import ScoredChunk
 from .semantic_index import SemanticIndex
 
 VALID_MODES = ("hybrid", "semantic", "bm25")
+
+_LEGACY_MODULE_ALIASES = {
+    "src": "docoracle",
+    "src.core": "docoracle.core",
+    "src.core.models": "docoracle.core.models",
+}
+
+
+def _install_legacy_pickle_aliases() -> None:
+    """Map pre-rename module paths onto the current package.
+
+    Stores pickled before the move from ``src.core`` to ``docoracle``
+    reference ``src.core.models.Chunk``; registering aliases lets them
+    unpickle instead of failing with ``ModuleNotFoundError``.
+    """
+    for legacy, current in _LEGACY_MODULE_ALIASES.items():
+        if legacy in sys.modules:
+            continue
+        try:
+            sys.modules[legacy] = importlib.import_module(current)
+        except ImportError:
+            continue
 
 
 class HybridSearcher:
@@ -215,6 +238,7 @@ class HybridSearcher:
         chunks_file = store_path / "chunks.pkl"
         if not chunks_file.exists():
             return False
+        _install_legacy_pickle_aliases()
         try:
             with open(chunks_file, "rb") as f:
                 raw = pickle.load(f)
