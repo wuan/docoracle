@@ -60,3 +60,14 @@ For multi-step tasks, state a brief plan:
 ```
 
 Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
+
+When writing tests:
+- Never use private or real user data as test cases. Use synthetic, anonymized fixtures instead.
+
+## 5. Conventional Commits
+
+**Follow the Conventional Commits format.**
+
+- Format: `type(scope): description` (e.g. `feat: add export button`, `fix(auth): handle expired tokens`).
+- Common types: `feat`, `fix`, `docs`, `refactor`, `test`, `chore`.
+- Keep the subject line imperative, lowercase, and without a trailing period.
