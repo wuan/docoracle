@@ -90,8 +90,7 @@ class Chunk(BaseModel):
 
 
 class Document(BaseModel):
-    """A document from Antora, normalized to Markdown.
-    """
+    """A document from Antora, normalized to Markdown."""
 
     content: str = Field(..., description="Markdown content (converted from AsciiDoc if needed)")
     file_path: str = Field(..., description="Path to the source file")
