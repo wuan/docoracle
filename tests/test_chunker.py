@@ -488,26 +488,26 @@ def test_breadcrumb_prepended_to_chunks():
     chunker = Chunker(chunk_size=500, overlap=10)
 
     document = Document(
-        content=convert_asciidoc_to_markdown("""= Wohnungskredite
+        content=convert_asciidoc_to_markdown("""= Overview
 
-== Kredit Oetztaler Str. 16
+== Details
 
-Höhe 200.000,00 EUR, Zinssatz 3,380 Prozent."""),
-        file_path="finanzen/modules/ROOT/pages/Wohnungskredite.adoc",
+Some sample content for the details section."""),
+        file_path="docs/modules/ROOT/pages/Overview.adoc",
         module="ROOT",
-        component="finanzen",
+        component="docs",
         version="1.0",
-        page_id="ROOT:pages:Wohnungskredite",
-        title="Wohnungskredite",
+        page_id="ROOT:pages:Overview",
+        title="Overview",
         sections=[
             {
-                "title": "Wohnungskredite",
-                "id": "wohnungskredite",
+                "title": "Overview",
+                "id": "overview",
                 "level": 1,
                 "children": [
                     {
-                        "title": "Kredit Oetztaler Str. 16",
-                        "id": "kredit-oetztaler-str-16",
+                        "title": "Details",
+                        "id": "details",
                         "level": 2,
                     },
                 ],
@@ -518,15 +518,15 @@ Höhe 200.000,00 EUR, Zinssatz 3,380 Prozent."""),
     chunks = chunker.chunk_document(document)
     assert chunks, "should produce at least one chunk"
 
-    kredit_chunks = [c for c in chunks if c.section_id == "kredit-oetztaler-str-16"]
-    assert kredit_chunks, "child section should produce a chunk"
+    details_chunks = [c for c in chunks if c.section_id == "details"]
+    assert details_chunks, "child section should produce a chunk"
 
-    breadcrumb = "finanzen > ROOT > Wohnungskredite > Kredit Oetztaler Str. 16"
-    assert kredit_chunks[0].text.startswith(breadcrumb), (
-        f"chunk should start with breadcrumb, got: {kredit_chunks[0].text[:120]}"
+    breadcrumb = "docs > ROOT > Overview > Details"
+    assert details_chunks[0].text.startswith(breadcrumb), (
+        f"chunk should start with breadcrumb, got: {details_chunks[0].text[:120]}"
     )
     # Section's own content also present
-    assert "Zinssatz" in kredit_chunks[0].text
+    assert "sample content" in details_chunks[0].text
 
 
 def test_breadcrumb_uses_component_title_when_set():
@@ -534,38 +534,38 @@ def test_breadcrumb_uses_component_title_when_set():
     chunker = Chunker(chunk_size=500, overlap=10)
 
     document = Document(
-        content=convert_asciidoc_to_markdown("""= Wohnungskredite
+        content=convert_asciidoc_to_markdown("""= Overview
 
-== Kredit
+== Details
 
 Some text."""),
-        file_path="finanzen/pages/Wohnungskredite.adoc",
+        file_path="docs/pages/Overview.adoc",
         module="ROOT",
-        component="finanzen",
-        component_title="Finanzen",
+        component="docs",
+        component_title="Documentation",
         version="1.0",
-        page_id="ROOT:pages:Wohnungskredite",
-        title="Wohnungskredite",
+        page_id="ROOT:pages:Overview",
+        title="Overview",
         sections=[
             {
-                "title": "Wohnungskredite",
-                "id": "wk",
+                "title": "Overview",
+                "id": "overview",
                 "level": 1,
                 "children": [
-                    {"title": "Kredit", "id": "kredit", "level": 2},
+                    {"title": "Details", "id": "details", "level": 2},
                 ],
             },
         ],
     )
 
     chunks = chunker.chunk_document(document)
-    kredit = [c for c in chunks if c.section_id == "kredit"][0]
+    details = [c for c in chunks if c.section_id == "details"][0]
 
     # Breadcrumb opens with the human title, not the lowercase identifier.
-    assert kredit.text.startswith("Finanzen >")
-    assert "finanzen >" not in kredit.text
+    assert details.text.startswith("Documentation >")
+    assert "docs >" not in details.text
     # The stable identifier remains on the chunk for filtering.
-    assert kredit.component == "finanzen"
+    assert details.component == "docs"
 
 
 def test_breadcrumb_collapses_duplicate_doc_title():
@@ -573,37 +573,37 @@ def test_breadcrumb_collapses_duplicate_doc_title():
     chunker = Chunker(chunk_size=500, overlap=10)
 
     document = Document(
-        content=convert_asciidoc_to_markdown("""= Geldanlage
+        content=convert_asciidoc_to_markdown("""= Guide
 
-Intro for Geldanlage.
+Intro for Guide.
 
-== Konten
+== Sections
 
-Konten content."""),
-        file_path="finanzen/pages/Geldanlage.adoc",
+Sections content."""),
+        file_path="docs/pages/Guide.adoc",
         module="ROOT",
-        component="finanzen",
+        component="docs",
         version="1.0",
-        page_id="ROOT:pages:Geldanlage",
-        title="Geldanlage",
+        page_id="ROOT:pages:Guide",
+        title="Guide",
         sections=[
             {
-                "title": "Geldanlage",
-                "id": "geldanlage",
+                "title": "Guide",
+                "id": "guide",
                 "level": 1,
                 "children": [
-                    {"title": "Konten", "id": "konten", "level": 2},
+                    {"title": "Sections", "id": "sections", "level": 2},
                 ],
             },
         ],
     )
 
     chunks = chunker.chunk_document(document)
-    konten = [c for c in chunks if c.section_id == "konten"][0]
+    sections = [c for c in chunks if c.section_id == "sections"][0]
 
-    # 'Geldanlage' should appear once in the breadcrumb prefix, not twice.
-    breadcrumb_line = konten.text.split("\n", 1)[0]
-    assert breadcrumb_line.count("Geldanlage") == 1
+    # 'Guide' should appear once in the breadcrumb prefix, not twice.
+    breadcrumb_line = sections.text.split("\n", 1)[0]
+    assert breadcrumb_line.count("Guide") == 1
 
 
 def test_subsection_content_not_included_in_parent():
@@ -671,54 +671,54 @@ def test_asciidoc_table_converted_to_flat_text():
     """AsciiDoc tables should arrive at the chunk text as readable 'Header: Value' lines."""
     chunker = Chunker(chunk_size=500, overlap=10)
 
-    asciidoc_content = """= Konten
+    asciidoc_content = """= Report
 
-== SSKM
+== Data
 
 [cols=",,",]
 |===
-|Buchung |Betrag |Bemerkung
-|von Ann-Christine |€ 500,00 |
-|Mieteinnahmen |€ 1060,00 |
-|Grundsteuer |€ –15,74 |€ 46,62 pro Quartal
+|Name |Amount |Note
+|First item |€ 10,00 |
+|Second item |€ 20,00 |
+|Third item |€ –5,00 |€ 1,25 per quarter
 |===
 """
 
     document = Document(
         # The loader converts AsciiDoc to Markdown before chunking.
         content=convert_asciidoc_to_markdown(asciidoc_content),
-        file_path="finanzen/pages/Geldanlage.adoc",
+        file_path="docs/pages/Report.adoc",
         module="ROOT",
-        component="finanzen",
+        component="docs",
         version="1.0",
-        page_id="ROOT:pages:Geldanlage",
-        title="Konten",
+        page_id="ROOT:pages:Report",
+        title="Report",
         sections=[
             {
-                "title": "Konten",
-                "id": "konten",
+                "title": "Report",
+                "id": "report",
                 "level": 1,
                 "children": [
-                    {"title": "SSKM", "id": "sskm", "level": 2},
+                    {"title": "Data", "id": "data", "level": 2},
                 ],
             },
         ],
     )
 
     chunks = chunker.chunk_document(document)
-    sskm_chunks = [c for c in chunks if c.section_id == "sskm"]
-    assert sskm_chunks, "SSKM section should produce a chunk"
+    data_chunks = [c for c in chunks if c.section_id == "data"]
+    assert data_chunks, "Data section should produce a chunk"
 
-    text = sskm_chunks[0].text
+    text = data_chunks[0].text
     # Table cell data must reach the chunk.
-    assert "Ann-Christine" in text
-    assert "500,00" in text
-    assert "Mieteinnahmen" in text
-    assert "1060,00" in text
-    assert "Grundsteuer" in text
-    assert "46,62 pro Quartal" in text
+    assert "First item" in text
+    assert "10,00" in text
+    assert "Second item" in text
+    assert "20,00" in text
+    assert "Third item" in text
+    assert "1,25 per quarter" in text
     # Header pairing is visible in the flattened format.
-    assert "Buchung: von Ann-Christine" in text or "Buchung:" in text
+    assert "Name: First item" in text or "Name:" in text
 
 
 def test_asciidoc_table_preserves_word_endings():
@@ -728,13 +728,13 @@ def test_asciidoc_table_preserves_word_endings():
     content = """[cols=",,",]
 |===
 |Name |Detail |Date
-|Versicherung |Unfall |2025
+|Widget |Level |2025
 |===
 """
     result = convert_asciidoc_to_markdown(content)
-    # The 'l' at the end of 'Unfall' must survive even though 'l|' looks like
+    # The 'l' at the end of 'Level' must survive even though 'l|' looks like
     # an AsciiDoc literal-cell modifier.
-    assert "Unfall" in result
+    assert "Level" in result
 
 
 def test_asciidoc_table_with_line_continuation():
@@ -744,13 +744,13 @@ def test_asciidoc_table_with_line_continuation():
     content = """[cols=",,",]
 |===
 |Name |Value |Date
-|die Bayerische +
-0390418209 +
-Andreas Würl |€ 41.507,30 |17.10.2025
+|Alpha Corp +
+0001112223 +
+Jane Doe |€ 41.507,30 |17.10.2025
 |===
 """
     result = convert_asciidoc_to_markdown(content)
-    assert "die Bayerische 0390418209 Andreas Würl" in result
+    assert "Alpha Corp 0001112223 Jane Doe" in result
     assert "41.507,30" in result
     assert "17.10.2025" in result
 
@@ -830,9 +830,9 @@ def test_xref_converted_to_markdown_link():
     from docoracle.core.converter import convert_asciidoc_to_markdown
 
     cases = {
-        "xref:Geldanlage.adoc[]": "[Geldanlage](Geldanlage)",
-        "xref:ROOT:Vorsorge.adoc[Vorsorge planen]": "[Vorsorge planen](Vorsorge)",
-        "xref:Jahre/Steuer 2024.adoc[]": "[Steuer 2024](Steuer 2024)",
+        "xref:Guide.adoc[]": "[Guide](Guide)",
+        "xref:ROOT:Planning.adoc[Planning ahead]": "[Planning ahead](Planning)",
+        "xref:Archive/Report 2024.adoc[]": "[Report 2024](Report 2024)",
     }
     for src, expected in cases.items():
         result = convert_asciidoc_to_markdown(src)
@@ -856,11 +856,11 @@ def test_inline_role_syntax_stripped():
     """``[.role]#text#`` should reduce to just ``text``."""
     from docoracle.core.converter import convert_asciidoc_to_markdown
 
-    content = "notarielle [.underline]#Beglaubigung# der Unterschrift"
+    content = "some [.underline]#highlighted# text here"
     result = convert_asciidoc_to_markdown(content)
-    assert "Beglaubigung" in result
+    assert "highlighted" in result
     assert "[.underline]" not in result
-    assert "#Beglaubigung#" not in result
+    assert "#highlighted#" not in result
 
 
 def test_dot_lists_convert_to_numbered_markdown():
