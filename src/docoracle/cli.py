@@ -138,8 +138,13 @@ def ingest(
 
     for doc in documents:
         chunks = doc.to_chunks(chunk_size=chunk_size, overlap=overlap)
+        page_path = doc.file_path
+        module_prefix = f"modules/{doc.module}/pages/"
+        if page_path.startswith(module_prefix):
+            page_path = page_path[len(module_prefix):]
+        collection = doc.component_title or doc.component
         click.echo(
-            f"  Processing: {doc.file_path} ({doc.component} > {doc.module}) - {len(chunks)} chunks"
+            f"  Processing: {collection} > {doc.module} > {page_path} - {len(chunks)} chunks"
         )
         all_chunks.extend(chunks)
         all_texts.extend([c.text for c in chunks])
