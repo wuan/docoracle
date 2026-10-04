@@ -60,11 +60,13 @@ class HybridSearcher:
         bm25: BM25Index | None = None,
         rrf_k: int = 60,
         prefetch_k: int | None = None,
+        bm25_min_score_ratio: float = 0.5,
     ) -> None:
         self.semantic = semantic or SemanticIndex()
         self.bm25 = bm25 or BM25Index()
         self.rrf_k = rrf_k
         self.prefetch_k = prefetch_k  # if None, callers compute it as 4 * top_k
+        self.bm25_min_score_ratio = bm25_min_score_ratio
 
         self.chunks: list[Chunk] = []
         self._chunk_dict: dict[str, Chunk] = {}
@@ -174,7 +176,23 @@ class HybridSearcher:
 
         where ``rank_i(d)`` is the 1-based rank of ``d`` in retriever
         ``i``'s list (a chunk absent from a list contributes 0).
+
+        BM25 always returns a full result list regardless of relevance
+        (zero-score tail matches on incidental token overlap). Before
+        fusion, BM25 results scoring below ``bm25_min_score_ratio`` of
+        the best BM25 score — and the entire list when the best score
+        is 0 — are discarded so a junk-only BM25 list cannot outvote
+        strong semantic hits. Set ``bm25_min_score_ratio`` to 0 to
+        disable the filter.
         """
+        if self.bm25_min_score_ratio > 0 and bm25_results:
+            top = max(r.score for r in bm25_results)
+            if top <= 0:
+                bm25_results = []
+            else:
+                cut = self.bm25_min_score_ratio * top
+                bm25_results = [r for r in bm25_results if r.score >= cut]
+
         scores: dict[str, float] = {}
         # Semantic-side contribution. ``ScoredChunk.sources["semantic"]``
         # is the 1-based rank assigned by ``SemanticIndex.search``.

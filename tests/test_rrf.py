@@ -97,3 +97,49 @@ def test_fusion_dedups_chunks_present_in_both_lists():
     bm = [ScoredChunk(chunk=chunk, score=1.0, sources={"bm25": 1})]
     fused = hs._rrf_fuse(sem, bm)
     assert len(fused) == 1
+
+
+def test_weak_bm25_tail_is_dropped_before_fusion():
+    """BM25 results far below the best BM25 score get no RRF vote."""
+    hs = HybridSearcher(bm25_min_score_ratio=0.5)
+    sem_chunk, weak_chunk = _make_chunk("sem"), _make_chunk("weak")
+    _seed(hs, sem_chunk, weak_chunk)
+    sem = [ScoredChunk(chunk=sem_chunk, score=0.9, sources={"semantic": 1})]
+    bm = [
+        ScoredChunk(chunk=sem_chunk, score=8.0, sources={"bm25": 1}),
+        ScoredChunk(chunk=weak_chunk, score=1.0, sources={"bm25": 2}),
+    ]
+    fused = hs._rrf_fuse(sem, bm)
+    by_id = {r.chunk.chunk_id: r for r in fused}
+    # weak_chunk scores 1/8 of the BM25 top -> filtered out, semantic only
+    assert weak_chunk.chunk_id not in by_id or by_id[weak_chunk.chunk_id].sources == {"semantic": 1}
+    assert by_id[sem_chunk.chunk_id].sources == {"semantic": 1, "bm25": 1}
+
+
+def test_zero_score_bm25_list_contributes_nothing():
+    """An all-zero BM25 list (no token overlap) is dropped entirely."""
+    hs = HybridSearcher(bm25_min_score_ratio=0.5)
+    sem_chunk, junk_chunk = _make_chunk("sem"), _make_chunk("junk")
+    _seed(hs, sem_chunk, junk_chunk)
+    sem = [ScoredChunk(chunk=sem_chunk, score=0.9, sources={"semantic": 1})]
+    bm = [
+        ScoredChunk(chunk=junk_chunk, score=0.0, sources={"bm25": 1}),
+        ScoredChunk(chunk=sem_chunk, score=0.0, sources={"bm25": 2}),
+    ]
+    fused = hs._rrf_fuse(sem, bm)
+    assert len(fused) == 1
+    assert fused[0].chunk.chunk_id == sem_chunk.chunk_id
+    assert fused[0].sources == {"semantic": 1}
+
+
+def test_bm25_min_score_ratio_zero_disables_filter():
+    hs = HybridSearcher(bm25_min_score_ratio=0.0)
+    sem_chunk, weak_chunk = _make_chunk("sem"), _make_chunk("weak")
+    _seed(hs, sem_chunk, weak_chunk)
+    sem = [ScoredChunk(chunk=sem_chunk, score=0.9, sources={"semantic": 1})]
+    bm = [
+        ScoredChunk(chunk=sem_chunk, score=8.0, sources={"bm25": 1}),
+        ScoredChunk(chunk=weak_chunk, score=1.0, sources={"bm25": 2}),
+    ]
+    fused = hs._rrf_fuse(sem, bm)
+    assert len(fused) == 2

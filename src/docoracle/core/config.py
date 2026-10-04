@@ -86,6 +86,17 @@ class RetrievalConfig(BaseModel):
     prefetch_k: int | None = Field(
         None, ge=1, description="Per-retriever prefetch count (defaults to 4 * top_k)"
     )
+    bm25_min_score_ratio: float = Field(
+        0.5,
+        ge=0.0,
+        le=1.0,
+        description=(
+            "During hybrid fusion, BM25 results scoring below this ratio of the "
+            "best BM25 score are dropped (and the whole BM25 list when its best "
+            "score is 0), so lexical noise cannot outvote strong semantic hits. "
+            "Set to 0 to disable."
+        ),
+    )
     bm25: BM25Config = Field(
         default_factory=lambda: BM25Config(),  # type: ignore[call-arg]
         description="BM25-specific configuration",

@@ -185,6 +185,7 @@ class QAAgent:
         searcher.rrf_k = self.config.retrieval.rrf_k
         if self.config.retrieval.prefetch_k is not None:
             searcher.prefetch_k = self.config.retrieval.prefetch_k
+        searcher.bm25_min_score_ratio = self.config.retrieval.bm25_min_score_ratio
 
         self.retrieval_tool = RetrievalTool(searcher, self.llm_client, mode=self.default_mode)
         self.summary_tool = SummaryTool(self.llm_client)

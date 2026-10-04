@@ -56,6 +56,7 @@ class QAEngine:
         self.searcher.rrf_k = self.rrf_k
         if self.prefetch_k is not None:
             self.searcher.prefetch_k = self.prefetch_k
+        self.searcher.bm25_min_score_ratio = self.config.retrieval.bm25_min_score_ratio
 
         # Generation configuration.
         self.max_context_length = self.config.generation.max_context_length
