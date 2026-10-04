@@ -141,11 +141,11 @@ def ingest(
         page_path = doc.file_path
         module_prefix = f"modules/{doc.module}/pages/"
         if page_path.startswith(module_prefix):
-            page_path = page_path[len(module_prefix):]
+            page_path = page_path[len(module_prefix) :]
         collection = doc.component_title or doc.component
-        click.echo(
-            f"  Processing: {collection} > {doc.module} > {page_path} - {len(chunks)} chunks"
-        )
+        module_label = doc.module if doc.module != "ROOT" else ""
+        parts = [collection, module_label, page_path]
+        click.echo(f"  Processing: {' > '.join(p for p in parts if p)} - {len(chunks)} chunks")
         all_chunks.extend(chunks)
         all_texts.extend([c.text for c in chunks])
 
