@@ -137,9 +137,10 @@ def ingest(
     all_texts: list[str] = []
 
     for doc in documents:
-        click.echo(f"  Processing: {doc.file_path} ({doc.component} > {doc.module})")
-
         chunks = doc.to_chunks(chunk_size=chunk_size, overlap=overlap)
+        click.echo(
+            f"  Processing: {doc.file_path} ({doc.component} > {doc.module}) - {len(chunks)} chunks"
+        )
         all_chunks.extend(chunks)
         all_texts.extend([c.text for c in chunks])
 
