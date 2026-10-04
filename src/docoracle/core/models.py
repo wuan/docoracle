@@ -1,7 +1,6 @@
 """Data models for the DocOracle system.
 
 Uses Pydantic BaseModel for type safety, validation, and built-in serialization.
-Maintains backward compatibility with the previous dataclass implementation.
 """
 
 import urllib.parse
@@ -13,10 +12,7 @@ from pydantic import BaseModel, Field
 class Chunk(BaseModel):
     """A chunk of text from an AsciiDoc document.
 
-    Replaces the previous dataclass implementation with Pydantic BaseModel.
     Provides built-in JSON serialization, field validation, and type safety.
-
-    The to_dict() and from_dict() methods are preserved for backward compatibility.
     """
 
     text: str = Field(..., description="The text content of the chunk")
@@ -33,28 +29,14 @@ class Chunk(BaseModel):
     hierarchy: list[str] = Field(default_factory=list, description="Document hierarchy path")
     metadata: dict[str, Any] = Field(default_factory=dict, description="Additional metadata")
 
-    # -------------------------------------------------------------------------
-    # Backward compatibility methods
-    # -------------------------------------------------------------------------
-
     def to_dict(self) -> dict[str, Any]:
-        """Convert chunk to dictionary for storage.
-
-        Preserved for backward compatibility with existing serialization code.
-        """
+        """Convert chunk to dictionary for storage."""
         return self.model_dump(exclude_none=True)
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "Chunk":
-        """Create chunk from dictionary.
-
-        Preserved for backward compatibility with existing deserialization code.
-        """
+        """Create chunk from dictionary."""
         return cls(**data)
-
-    # -------------------------------------------------------------------------
-    # Link generation methods (unchanged from original)
-    # -------------------------------------------------------------------------
 
     def get_link(self) -> str:
         """Generate link to source document section."""
@@ -109,8 +91,6 @@ class Chunk(BaseModel):
 
 class Document(BaseModel):
     """A document from Antora, normalized to Markdown.
-
-    Replaces the previous dataclass implementation with Pydantic BaseModel.
     """
 
     content: str = Field(..., description="Markdown content (converted from AsciiDoc if needed)")
@@ -131,18 +111,12 @@ class Document(BaseModel):
     hierarchy: list[str] = Field(default_factory=list, description="Document hierarchy path")
 
     def to_dict(self) -> dict[str, Any]:
-        """Convert document to dictionary for storage.
-
-        Preserved for backward compatibility.
-        """
+        """Convert document to dictionary for storage."""
         return self.model_dump(exclude_none=True)
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "Document":
-        """Create document from dictionary.
-
-        Preserved for backward compatibility.
-        """
+        """Create document from dictionary."""
         return cls(**data)
 
     def to_chunks(self, chunk_size: int = 512, overlap: int = 50) -> list[Chunk]:

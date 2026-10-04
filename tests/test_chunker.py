@@ -467,7 +467,7 @@ This has **bold** and *italic* and `code`.
     assert "*" not in clean
     assert "`" not in clean
     assert "<" not in clean
-    # Pipe characters are no longer stripped — markdown tables (and our
+    # Pipe characters are not stripped — markdown tables (and our
     # flattened-table separator) survive into the chunk text.
 
     # Should preserve text content (inline code text now preserved, tables kept)

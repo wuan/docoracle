@@ -3,9 +3,8 @@
 Defines:
 - ``ScoredChunk``: the unified result type returned by every ``SearchIndex``
 - ``SearchIndex``: a Protocol every index implementation must satisfy
-- ``matches_filters``: the metadata filter primitive, lifted out of the
-  legacy ``VectorStore`` so semantic and BM25 paths share the exact same
-  semantics.
+- ``matches_filters``: the metadata filter primitive shared by the
+  semantic and BM25 paths so they apply the exact same semantics.
 """
 
 from __future__ import annotations
