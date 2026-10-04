@@ -223,7 +223,13 @@ class HybridSearcher:
             # surfacing as a cryptic AttributeError on first access.
             self.chunks = [Chunk.model_validate(c) for c in raw]
             self._chunk_dict = {c.chunk_id: c for c in self.chunks}
-        except (ValidationError, AttributeError, TypeError, pickle.UnpicklingError) as e:
+        except (
+            ValidationError,
+            AttributeError,
+            TypeError,
+            ImportError,
+            pickle.UnpicklingError,
+        ) as e:
             print(
                 f"Warning: chunks.pkl at {store_path} is incompatible with the "
                 f"current Chunk schema ({type(e).__name__}: {e}). "
