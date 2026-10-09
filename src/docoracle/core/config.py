@@ -5,10 +5,10 @@ Supports loading from YAML files, environment variables, and provides defaults.
 """
 
 import os
-from typing import Any, Literal
+from typing import Annotated, Any, Literal
 
 import yaml
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 # =============================================================================
 # CONFIGURATION MODELS
@@ -134,12 +134,79 @@ class PromptsConfig(BaseModel):
     )
 
 
+class StdioMCPServerConfig(BaseModel):
+    """Configuration for an MCP server reached over stdio.
+
+    ``command`` is the executable name (e.g. ``uvx``) and ``args`` are its
+    arguments, mirroring pydantic-ai's stdio transport convention. The runtime
+    itself (e.g. ``uvx`` and     the server package) must be provided by the host;
+    DocOracle does not install it.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    name: str = Field(description="Unique server name, used in logs and errors")
+    transport: Literal["stdio"]
+    command: str = Field(description="Executable that speaks MCP over stdio (e.g. 'uvx')")
+    args: list[str] = Field(default_factory=list, description="Arguments passed to ``command``")
+    env: dict[str, str] = Field(
+        default_factory=dict, description="Extra environment variables for the subprocess"
+    )
+    enabled: bool = Field(True, description="Whether to connect this server")
+
+
+class StreamableHTTPMCPServerConfig(BaseModel):
+    """Configuration for an MCP server reached over streamable HTTP."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    name: str = Field(description="Unique server name, used in logs and errors")
+    transport: Literal["streamable-http"]
+    url: str = Field(description="Streamable HTTP endpoint of the MCP server")
+    headers: dict[str, str] = Field(
+        default_factory=dict, description="Extra HTTP headers sent with each request"
+    )
+    enabled: bool = Field(True, description="Whether to connect this server")
+
+
+MCPServerConfig = Annotated[
+    StdioMCPServerConfig | StreamableHTTPMCPServerConfig,
+    Field(discriminator="transport"),
+]
+
+
+class AgentConfig(BaseModel):
+    """Agent backend configuration."""
+
+    mcp_servers: list[MCPServerConfig] = Field(
+        default_factory=list,
+        description=(
+            "MCP servers whose tools are exposed to the agent. Each entry selects "
+            "'stdio' or 'streamable-http' and carries only that transport's fields."
+        ),
+    )
+
+    @model_validator(mode="after")
+    def _unique_server_names(self) -> "AgentConfig":
+        """Reject duplicate server names, which are used in logs and errors."""
+        seen: set[str] = set()
+        for server in self.mcp_servers:
+            if server.name in seen:
+                raise ValueError(f"Duplicate MCP server name: {server.name!r}")
+            seen.add(server.name)
+        return self
+
+
 class DocOracleConfig(BaseModel):
     """Answer-backend selection."""
 
     backend: Literal["engine", "agent"] = Field(
         "engine",
         description="Answer backend: 'engine' (deterministic) or 'agent' (tool-using)",
+    )
+    agent: AgentConfig = Field(
+        default_factory=lambda: AgentConfig(),  # type: ignore[arg-type]
+        description="Agent backend configuration (MCP servers)",
     )
 
 
