@@ -54,7 +54,7 @@ class StubMCPToolset(AbstractToolset[RetrievalState]):
     def id(self) -> str:
         return self._name
 
-    async def __aenter__(self) -> "StubMCPToolset":
+    async def __aenter__(self) -> StubMCPToolset:
         self.entered += 1
         return self
 
@@ -70,7 +70,9 @@ class StubMCPToolset(AbstractToolset[RetrievalState]):
         return {
             "echo": ToolsetTool(
                 toolset=self,
-                tool_def=ToolDefinition(name="echo", description="Echo text", parameters_json_schema=schema),
+                tool_def=ToolDefinition(
+                    name="echo", description="Echo text", parameters_json_schema=schema
+                ),
                 max_retries=1,
                 args_validator=pydantic.TypeAdapter(dict).validator,
             )
@@ -161,7 +163,10 @@ def test_disabled_server_never_connected_at_construction() -> None:
     from docoracle.core.config import StreamableHTTPMCPServerConfig
 
     server = StreamableHTTPMCPServerConfig(
-        name="off", transport="streamable-http", url="https://unreachable.invalid/mcp", enabled=False
+        name="off",
+        transport="streamable-http",
+        url="https://unreachable.invalid/mcp",
+        enabled=False,
     )
     pairs = build_mcp_toolsets([server])
     qa = _make_agent([toolset for _, toolset in pairs])
@@ -186,24 +191,52 @@ def test_engine_backend_ignores_toolsets() -> None:
     assert not hasattr(backend, "mcp_toolsets")
 
 
-def test_enabled_server_connect_failure_is_fail_fast() -> None:
-    manager = MCPToolsetManager([("broken", StubMCPToolset("broken", fail_on_call=False))])
-    manager._toolsets[0] = ("broken", _FailingEntryToolset())  # type: ignore[list-item]
+class _FailingEntryToolset(StubMCPToolset):
+    async def __aenter__(self) -> _FailingEntryToolset:
+        raise RuntimeError("cannot start server")
 
+
+def test_enabled_server_connect_failure_is_fail_fast() -> None:
     import asyncio
+
+    manager = MCPToolsetManager([("broken", _FailingEntryToolset("broken"))])  # type: ignore[list-item]
 
     async def run() -> None:
         with pytest.raises(MCPConnectionError) as exc:
             async with manager:
                 pass
         assert exc.value.server_name == "broken"
+        assert "cannot start server" in str(exc.value)
 
     asyncio.run(run())
 
 
-class _FailingEntryToolset(StubMCPToolset):
-    async def __aenter__(self) -> "_FailingEntryToolset":
-        raise RuntimeError("cannot start server")
+def test_server_startup_fails_fast_and_serves_no_request() -> None:
+    failing = _FailingEntryToolset("broken")
+
+    with (
+        patch.object(server_main, "build_mcp_toolsets", return_value=[("broken", failing)]),
+        pytest.raises(MCPConnectionError),
+        TestClient(app) as client,
+    ):
+        # Startup aborted, so no request is ever served.
+        client.get("/health")
+
+
+def test_agent_construction_fails_fast_via_factory_path() -> None:
+    import asyncio
+
+    # A server that cannot connect means the agent is never constructed.
+    manager = MCPToolsetManager([("broken", _FailingEntryToolset("broken"))])  # type: ignore[list-item]
+    constructed: list[QAAgent] = []
+
+    async def run() -> None:
+        with pytest.raises(MCPConnectionError):
+            async with manager:
+                constructed.append(_make_agent(manager.toolsets))
+
+    asyncio.run(run())
+    assert constructed == []
 
 
 # =============================================================================
@@ -249,13 +282,15 @@ def test_existing_agent_behavior_without_mcp() -> None:
 
 def test_server_lifespan_connects_once_reused_across_requests() -> None:
     toolset = StubMCPToolset("s")
-    with patch.object(server_main, "build_mcp_toolsets", return_value=[("s", toolset)]):
-        with TestClient(app) as client:
-            assert toolset.entered == 1
-            client.get("/health")
-            client.get("/health")
-            # Connections are established once at startup, not per request.
-            assert toolset.entered == 1
+    with (
+        patch.object(server_main, "build_mcp_toolsets", return_value=[("s", toolset)]),
+        TestClient(app) as client,
+    ):
+        assert toolset.entered == 1
+        client.get("/health")
+        client.get("/health")
+        # Connections are established once at startup, not per request.
+        assert toolset.entered == 1
     # ... and closed at shutdown.
     assert toolset.exited == 1
 

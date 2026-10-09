@@ -284,9 +284,7 @@ def ask(
             retrieval=retrieval,
         )
 
-    result: dict[str, Any] = asyncio.run(
-        _run_with_mcp_lifecycle(pydantic_config, _answer)
-    )
+    result: dict[str, Any] = asyncio.run(_run_with_mcp_lifecycle(pydantic_config, _answer))
 
     click.echo(f"\nAnswer:\n{result['answer']}")
 
@@ -358,9 +356,7 @@ def search(
             backend.default_mode = retrieval
         return await asyncio.to_thread(backend.get_related_chunks, text, k=k, **filters)
 
-    results: list[ScoredChunk] = asyncio.run(
-        _run_with_mcp_lifecycle(pydantic_config, _search)
-    )
+    results: list[ScoredChunk] = asyncio.run(_run_with_mcp_lifecycle(pydantic_config, _search))
 
     for i, scored in enumerate(results, 1):
         chunk = scored.chunk

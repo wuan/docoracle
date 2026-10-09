@@ -31,7 +31,9 @@ def test_stdio_entry_is_accepted() -> None:
 
 
 def test_streamable_http_entry_is_accepted() -> None:
-    config = _config([{"name": "web", "transport": "streamable-http", "url": "https://example.com/mcp"}])
+    config = _config(
+        [{"name": "web", "transport": "streamable-http", "url": "https://example.com/mcp"}]
+    )
     server = config.docoracle.agent.mcp_servers[0]
     assert server.transport == "streamable-http"
     assert server.url == "https://example.com/mcp"  # type: ignore[union-attr]
@@ -49,7 +51,16 @@ def test_stdio_entry_may_not_supply_url() -> None:
 
 def test_streamable_http_entry_may_not_supply_command() -> None:
     with pytest.raises(ValidationError):
-        _config([{"name": "web", "transport": "streamable-http", "url": "https://x/mcp", "command": "uvx"}])
+        _config(
+            [
+                {
+                    "name": "web",
+                    "transport": "streamable-http",
+                    "url": "https://x/mcp",
+                    "command": "uvx",
+                }
+            ]
+        )
 
 
 def test_unknown_transport_is_rejected_naming_valid_transports() -> None:

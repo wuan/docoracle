@@ -18,7 +18,8 @@ from contextlib import AsyncExitStack
 from types import TracebackType
 from typing import Any
 
-from pydantic_ai.mcp import FastMCPClient, MCPToolset, StdioTransport, StreamableHttpTransport
+from fastmcp.client.transports import StdioTransport, StreamableHttpTransport
+from pydantic_ai.mcp import MCPToolset
 
 from ..core.config import (
     MCPServerConfig,
@@ -42,11 +43,12 @@ def build_mcp_toolset(config: MCPServerConfig) -> MCPToolset[Any]:
     """Build a pydantic-ai MCP toolset for a single enabled server entry."""
     if isinstance(config, StdioMCPServerConfig):
         transport = StdioTransport(config.command, config.args, env=config.env)
-    elif isinstance(config, StreamableHTTPMCPServerConfig):
-        transport = StreamableHttpTransport(config.url, headers=config.headers)
-    else:  # pragma: no cover - the union is exhaustive
-        raise TypeError(f"Unsupported MCP server config: {type(config).__name__}")
-    return MCPToolset(FastMCPClient(transport))
+    else:
+        # The union on ``transport`` is exhaustive: non-stdio entries are
+        # streamable-http.
+        http_config: StreamableHTTPMCPServerConfig = config
+        transport = StreamableHttpTransport(http_config.url, headers=http_config.headers)
+    return MCPToolset(transport)
 
 
 def build_mcp_toolsets(servers: Sequence[MCPServerConfig]) -> list[tuple[str, MCPToolset[Any]]]:
@@ -82,7 +84,7 @@ class MCPToolsetManager:
         """The toolsets to mount on the agent (empty when none are enabled)."""
         return [toolset for _, toolset in self._toolsets]
 
-    async def __aenter__(self) -> "MCPToolsetManager":
+    async def __aenter__(self) -> MCPToolsetManager:
         stack = AsyncExitStack()
         await stack.__aenter__()
         for name, toolset in self._toolsets:
