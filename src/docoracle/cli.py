@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 
 from docoracle.api.structured_llm_client import StructuredLLMClient
 from docoracle.backends.factory import create_answer_backend
+from docoracle.backends.mcp import MCPToolsetManager, build_mcp_toolsets
 from docoracle.backends.protocol import AnswerBackend
 from docoracle.core.bm25_index import BM25Index
 from docoracle.core.config import Config, get_config
@@ -18,6 +19,20 @@ from docoracle.core.search_index import ScoredChunk
 
 # Load environment variables from .env file
 load_dotenv()
+
+
+async def _run_with_mcp_lifecycle(
+    config: Config,
+    coro_factory: Any,
+) -> Any:
+    """Run ``coro_factory(toolsets)`` with the MCP connections owned for the call.
+
+    Enabled MCP servers are connected for the duration of the invocation and
+    closed afterward. With no servers configured this is a no-op.
+    """
+    manager = MCPToolsetManager(build_mcp_toolsets(config.docoracle.agent.mcp_servers))
+    async with manager:
+        return await coro_factory(manager.toolsets)
 
 
 def _get_pydantic_config(config_path: str) -> Config:
@@ -249,19 +264,28 @@ def ask(
 
     click.echo(f"Loaded {len(searcher)} chunks from store")
 
+    import asyncio
+
     llm_client = StructuredLLMClient(config_path)
-    backend: AnswerBackend = create_answer_backend(searcher, llm_client, pydantic_config)
 
     click.echo(f"\nQuestion: {question}")
     click.echo("-" * 60)
 
-    result: dict[str, Any] = backend.ask_detailed(
-        question=question,
-        module=module,
-        component=component,
-        version=version,
-        k=k,
-        retrieval=retrieval,
+    async def _answer(toolsets: list[Any]) -> dict[str, Any]:
+        backend: AnswerBackend = create_answer_backend(
+            searcher, llm_client, pydantic_config, toolsets=toolsets
+        )
+        return await backend.ask_detailed_async(
+            question=question,
+            module=module,
+            component=component,
+            version=version,
+            k=k,
+            retrieval=retrieval,
+        )
+
+    result: dict[str, Any] = asyncio.run(
+        _run_with_mcp_lifecycle(pydantic_config, _answer)
     )
 
     click.echo(f"\nAnswer:\n{result['answer']}")
@@ -314,8 +338,9 @@ def search(
         click.echo("Error: No store found. Run 'ingest' first.")
         return
 
+    import asyncio
+
     llm_client = StructuredLLMClient(config_path)
-    backend: AnswerBackend = create_answer_backend(searcher, llm_client, pydantic_config)
 
     click.echo(f"Searching for: '{text}'")
     click.echo("-" * 60)
@@ -324,11 +349,18 @@ def search(
     if module:
         filters["module"] = module
 
-    # Override the backend's default mode if the user passed --retrieval.
-    if retrieval:
-        backend.default_mode = retrieval
+    async def _search(toolsets: list[Any]) -> list[ScoredChunk]:
+        backend: AnswerBackend = create_answer_backend(
+            searcher, llm_client, pydantic_config, toolsets=toolsets
+        )
+        # Override the backend's default mode if the user passed --retrieval.
+        if retrieval:
+            backend.default_mode = retrieval
+        return await asyncio.to_thread(backend.get_related_chunks, text, k=k, **filters)
 
-    results: list[ScoredChunk] = backend.get_related_chunks(text, k=k, **filters)
+    results: list[ScoredChunk] = asyncio.run(
+        _run_with_mcp_lifecycle(pydantic_config, _search)
+    )
 
     for i, scored in enumerate(results, 1):
         chunk = scored.chunk
