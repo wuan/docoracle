@@ -1,5 +1,11 @@
 ## ADDED Requirements
 
+<!-- Implementation note: the enabled entries are realised as pydantic-ai
+     `MCPToolset`s built from FastMCP transports — `StdioTransport(command,
+     args, env)` for `stdio` and `StreamableHttpTransport(url, headers)` for
+     `streamable-http`. The requirements below describe behavior; class names
+     are illustrative of the pinned pydantic-ai API, not a normative contract. -->
+
 ### Requirement: MCP server configuration
 
 The system SHALL expose an `agent.mcp_servers` list in configuration, where each

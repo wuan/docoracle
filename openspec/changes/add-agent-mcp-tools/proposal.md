@@ -21,8 +21,9 @@ retrieval tool stays a permanently-on internal built-in.
   transport, a `stdio` entry missing `command`, a `streamable-http` entry missing
   `url`, or a duplicate `name` all fail at config load.
 - **Add `src/docoracle/backends/mcp.py`**: a connection-management module that turns
-  the enabled config entries into pydantic-ai `MCPServerStdio` /
-  `MCPServerStreamableHTTP` toolsets and owns their long-lived lifecycle.
+  the enabled config entries into pydantic-ai `MCPToolset`s — built from FastMCP
+  `StdioTransport` / `StreamableHttpTransport` — and owns their long-lived
+  lifecycle.
 - **Wire the toolsets into `QAAgent`**: the retrieval tool remains an always-on
   internal built-in and is never part of the toggleable list; enabled MCP toolsets
   are added alongside it. If any enabled MCP server fails to connect during agent
