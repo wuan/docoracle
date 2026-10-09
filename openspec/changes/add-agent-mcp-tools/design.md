@@ -7,10 +7,12 @@ The `agent` backend (`src/docoracle/backends/agent.py::QAAgent`) is a pydantic-a
 tool, returns a validated `AnswerResponse`, and relies on the same
 OpenAI-compatible chat model as the engine.
 
-pydantic-ai 2.x ships native MCP toolsets: `MCPServerStdio` (spawns a subprocess
-speaking MCP over stdio) and `MCPServerStreamableHTTP` (connects to a remote MCP
-endpoint over streamable HTTP). Both are context-managed: a long-lived `async with`
-enters the connection, and their tools are passed to `Agent(toolsets=[...])`.
+pydantic-ai 2.x ships native MCP toolsets. In the pinned version the API is a
+single `MCPToolset` built from a transport: `StdioTransport(command, args, env)`
+spawns a subprocess speaking MCP over stdio, and
+`StreamableHttpTransport(url, headers)` connects to a remote MCP endpoint over
+streamable HTTP. The toolset is context-managed: a long-lived `async with` enters
+the connection, and the toolsets are passed to `Agent(toolsets=[...])`.
 
 Configuration today is a single `docoracle.backend` field
 (`src/docoracle/core/config.py::DocOracleConfig`). `Config.from_yaml` already
@@ -99,8 +101,8 @@ Model each entry as a pydantic discriminated union keyed on `transport`:
 class StdioMCPServerConfig(BaseModel):
     name: str
     transport: Literal["stdio"]
-    command: list[str]
-    args: list[str] = []
+    command: str            # executable name, e.g. "uvx"
+    args: list[str] = []    # arguments passed to ``command``
     env: dict[str, str] = {}
     enabled: bool = True
 
@@ -137,7 +139,8 @@ docoracle:
     mcp_servers:
       - name: home_assistant         # required, unique, used in logs/errors
         transport: stdio             # Literal["stdio", "streamable-http"]
-        command: ["uvx", "mcp-server-home-assistant"]   # stdio only
+        command: uvx                 # stdio only: executable name
+        args: ["mcp-server-home-assistant"]   # stdio only, optional arguments
         env:                          # stdio only, optional
           HA_URL: ${HA_URL}         # resolved by the existing ${VAR} pass
         enabled: true                 # default true
@@ -161,10 +164,11 @@ strings.
 
 ### Long-lived connections owned by the agent
 
-MCP toolsets are context-managed, so the agent must hold their live connection for
-its whole working life — across requests for the server, and for the invocation
-for the CLI. `src/docoracle/backends/mcp.py` provides the toolsets plus a lifecycle
-manager (an async context manager) that the entry points drive:
+MCP `MCPToolset`s are context-managed, so the agent must hold their live
+connection for its whole working life — across requests for the server, and for
+the invocation for the CLI. `src/docoracle/backends/mcp.py` provides a builder
+(config entry → `MCPToolset`) plus a lifecycle manager (an async context manager)
+that the entry points drive:
 
 - `src/docoracle/backends/agent.py`: `QAAgent` accepts the built toolsets and
   mounts them; construction validates that every enabled server connects.
