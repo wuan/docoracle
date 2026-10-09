@@ -101,10 +101,11 @@ Model each entry as a pydantic discriminated union keyed on `transport`:
 class StdioMCPServerConfig(BaseModel):
     name: str
     transport: Literal["stdio"]
-    command: str            # executable name, e.g. "uvx"
-    args: list[str] = []    # arguments passed to ``command``
+    command: str  # executable name, e.g. "uvx"
+    args: list[str] = []  # arguments passed to ``command``
     env: dict[str, str] = {}
     enabled: bool = True
+
 
 class StreamableHTTPMCPServerConfig(BaseModel):
     name: str
@@ -112,6 +113,7 @@ class StreamableHTTPMCPServerConfig(BaseModel):
     url: str
     headers: dict[str, str] = {}
     enabled: bool = True
+
 
 MCPServerConfig = Annotated[
     StdioMCPServerConfig | StreamableHTTPMCPServerConfig,
