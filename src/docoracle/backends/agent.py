@@ -16,11 +16,13 @@ state and callers can still report retrieval provenance.
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import dataclass, field
 from typing import Any
 
 from pydantic_ai import Agent, ModelSettings, RunContext, Tool
 from pydantic_ai.messages import ToolCallPart, ToolReturnPart
+from pydantic_ai.toolsets import AbstractToolset
 
 from ..api.structured_llm_client import StructuredLLMClient, build_chat_model
 from ..core.config import Config, get_config, resolve_api_key
@@ -171,6 +173,7 @@ class QAAgent:
         llm_client: Any | None = None,
         mode: str | None = None,
         config: Config | None = None,
+        toolsets: Sequence[AbstractToolset[RetrievalState]] | None = None,
     ) -> None:
         self.config: Config = config if config is not None else get_config(config_path)
         self.searcher = searcher
@@ -195,12 +198,16 @@ class QAAgent:
             self.config.llm.api_url,
             resolve_api_key(self.config),
         )
+        # The retrieval and summary tools are always-on internal built-ins; MCP
+        # toolsets are mounted alongside them and never replace them.
+        self.mcp_toolsets: list[AbstractToolset[RetrievalState]] = list(toolsets or [])
         self.agent: Agent[RetrievalState, AnswerResponse] = Agent(
             model=model,
             output_type=AnswerResponse,
             deps_type=RetrievalState,
             instructions=self.config.prompts.system,
             tools=[self.retrieval_tool.as_tool(), self.summary_tool.as_tool()],
+            toolsets=self.mcp_toolsets,
         )
 
     def _model_settings(self, temperature: float | None, max_tokens: int | None) -> ModelSettings:

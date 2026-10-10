@@ -288,6 +288,7 @@ docoracle/
 │       │   ├── protocol.py        # AnswerBackend Protocol + shared result builder
 │       │   ├── engine.py          # QAEngine: retrieve-then-answer
 │       │   ├── agent.py           # QAAgent: tool-using pydantic-ai agent
+│       │   ├── mcp.py             # MCP toolset construction + lifecycle
 │       │   └── factory.py         # create_answer_backend (config-driven)
 │       ├── api/
 │       │   └── structured_llm_client.py  # Embeddings, chat, native structured output
@@ -383,6 +384,50 @@ docoracle:
 - **`agent`** — a pydantic-ai agent with a retrieval tool (and a summarization
   tool) that decides for itself whether to retrieve. Useful for multi-hop or
   adaptive retrieval, at the cost of determinism and extra LLM calls.
+
+### MCP tools
+
+Under the `agent` backend you can expose tools from external
+[Model Context Protocol](https://modelcontextprotocol.io) servers. List them
+under `docoracle.agent.mcp_servers`; each entry selects a `transport` and
+carries only that transport's fields. The retrieval tool stays always on and is
+never toggleable — MCP servers only add tools alongside it.
+
+```yaml
+docoracle:
+  backend: agent
+  agent:
+    mcp_servers:
+      - name: home_assistant          # required, unique, used in logs/errors
+        transport: stdio
+        command: uvx                  # stdio only: executable name
+        args: ["mcp-server-home-assistant"]  # stdio only: optional arguments
+        env:                          # stdio only, optional
+          HA_URL: ${HA_URL}           # ${VAR} is resolved by the config loader
+        enabled: true                 # default true
+      - name: web_search
+        transport: streamable-http
+        url: https://example.com/mcp  # streamable-http only
+        headers: {}                   # streamable-http only, optional
+        enabled: false
+```
+
+- **Transports**: `stdio` (spawns a subprocess) and `streamable-http` (connects
+  to a remote endpoint). Legacy SSE is not supported.
+- **Validation**: an unknown transport, a `stdio` entry missing `command`, a
+  `streamable-http` entry missing `url`, a duplicate `name`, or a field from the
+  wrong transport fails configuration loading.
+- **Fail fast, lenient runtime**: every *enabled* server must connect when the
+  process starts (the server's lifespan or the CLI invocation); if one cannot,
+  startup fails immediately with an error naming the server. Once running, a
+  server that dies mid-tool-call surfaces the error to the model as a normal
+  tool error instead of crashing the request.
+- **Long-lived connections**: connections open once at startup/for the CLI
+  invocation and are reused across requests; they are never opened per request.
+- **No runtime bundling**: stdio servers assume the host provides the runtime
+  (e.g. `uvx`) and the server package. DocOracle does not install them.
+- **Engine unaffected**: `docoracle.backend: engine` ignores `mcp_servers`
+  entirely.
 
 ## Structured Outputs
 

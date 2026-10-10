@@ -2,6 +2,7 @@
 
 import asyncio
 import logging
+from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Any, Literal
 
@@ -14,6 +15,7 @@ from pydantic import BaseModel, Field
 
 from docoracle.api.structured_llm_client import StructuredLLMClient
 from docoracle.backends.factory import create_answer_backend
+from docoracle.backends.mcp import MCPToolsetManager, build_mcp_toolsets
 from docoracle.backends.protocol import AnswerBackend
 from docoracle.core.config import Config, get_config
 from docoracle.core.hybrid_searcher import VALID_MODES, HybridSearcher
@@ -30,6 +32,7 @@ _searcher: HybridSearcher | None = None
 _backend: AnswerBackend | None = None
 _llm_client: StructuredLLMClient | None = None
 _config: Config | None = None
+_mcp_manager: MCPToolsetManager | None = None
 
 
 def _get_config(config_path: str = "config.yaml") -> Config:
@@ -38,6 +41,29 @@ def _get_config(config_path: str = "config.yaml") -> Config:
     if _config is None:
         _config = get_config(config_path)
     return _config
+
+
+def _current_mcp_toolsets() -> list[Any]:
+    """The live MCP toolsets, if the MCP lifecycle is active."""
+    return _mcp_manager.toolsets if _mcp_manager is not None else []
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Own the MCP connections for the whole application lifetime.
+
+    Enabled MCP servers are connected once at startup (fail fast) and closed at
+    shutdown, so a request never pays connect cost or churns connections.
+    """
+    global _mcp_manager
+    config = _get_config()
+    manager = MCPToolsetManager(build_mcp_toolsets(config.docoracle.agent.mcp_servers))
+    async with manager:
+        _mcp_manager = manager
+        try:
+            yield
+        finally:
+            _mcp_manager = None
 
 
 def get_searcher(config_path: str = "config.yaml") -> HybridSearcher:
@@ -53,7 +79,9 @@ def get_searcher(config_path: str = "config.yaml") -> HybridSearcher:
             _llm_client = StructuredLLMClient(config_path)
 
         if _backend is None:
-            _backend = create_answer_backend(_searcher, _llm_client, config)
+            _backend = create_answer_backend(
+                _searcher, _llm_client, config, toolsets=_current_mcp_toolsets()
+            )
 
     return _searcher
 
@@ -154,6 +182,7 @@ app = FastAPI(
     title="DocOracle API",
     description="Answer questions about documentation",
     version="0.2.0",
+    lifespan=lifespan,
 )
 
 

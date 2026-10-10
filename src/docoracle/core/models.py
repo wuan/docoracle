@@ -62,7 +62,8 @@ class Chunk(BaseModel):
         document_title = self.metadata.get("document_title")
         if document_title:
             parts.append(document_title)
-        for t in self.metadata.get("section_path_titles") or []:
+        section_path_titles: list[str] = self.metadata.get("section_path_titles") or []
+        for t in section_path_titles:
             if t:
                 parts.append(t)
         if self.section_title:
