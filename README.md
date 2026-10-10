@@ -1,3 +1,10 @@
+[![Quality gate status](https://sonarcloud.io/api/project_badges/measure?project=wuan_docoracle&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=wuan_docoracle)
+[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=wuan_docoracle&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=wuan_docoracle)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=wuan_docoracle&metric=coverage)](https://sonarcloud.io/summary/new_code?id=wuan_docoracle)
+[![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=wuan_docoracle&metric=duplicated_lines_density)](https://sonarcloud.io/summary/new_code?id=wuan_docoracle)
+[![Maintainability issues](https://sonarcloud.io/api/project_badges/measure?project=wuan_docoracle&metric=software_quality_maintainability_issues)](https://sonarcloud.io/summary/new_code?id=wuan_docoracle)
+[![Reliability issues](https://sonarcloud.io/api/project_badges/measure?project=wuan_docoracle&metric=software_quality_reliability_issues)](https://sonarcloud.io/summary/new_code?id=wuan_docoracle)
+
 # DocOracle
 
 Answer questions about your Antora/AsciiDoc documentation using LLM APIs.
