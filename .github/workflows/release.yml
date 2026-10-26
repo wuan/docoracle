@@ -50,7 +50,7 @@ jobs:
           path: dist/
 
       - name: Generate PEP 740 attestations
-        uses: astral-sh/attest-action@v0.0.6
+        uses: astral-sh/attest-action@v0.0.7
 
       - name: Publish
         run: uv publish
